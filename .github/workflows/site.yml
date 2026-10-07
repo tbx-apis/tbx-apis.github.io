@@ -1,0 +1,43 @@
+name: Sync & publish TBX API catalogue
+on:
+  push:
+    branches: [main]
+  issues:
+    types: [opened]
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+concurrency:
+  group: tbx-site
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name != 'issues' || (startsWith(github.event.issue.title, 'tbx-sync ') && github.event.issue.user.login == github.repository_owner)
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble feed from the TBX flow
+        if: github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 tools/assemble.py
+          if ! git diff --quiet site/data.json; then
+            git config user.name "tbx-sync-bot"
+            git config user.email "tbx-sync-bot@users.noreply.github.com"
+            git add site/data.json
+            git commit -m "Catalogue sync $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
