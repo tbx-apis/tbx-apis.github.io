@@ -379,6 +379,19 @@ const MOB={'+91':[/^[6-9]\d{9}$/,'10 digits starting with 6, 7, 8 or 9'],'+971':
  '+84':[/^[35789]\d{8}$/,'9 digits'],'+880':[/^1\d{9}$/,'10 digits starting with 1'],'+94':[/^7\d{8}$/,'9 digits starting with 7'],'+977':[/^9\d{9}$/,'10 digits starting with 9'],
  '+44':[/^7\d{9}$/,'10 digits starting with 7'],'+1':[/^[2-9]\d{9}$/,'10 digits'],'+61':[/^4\d{8}$/,'9 digits starting with 4'],'+27':[/^[678]\d{8}$/,'9 digits'],
  '+234':[/^[789]\d{9}$/,'10 digits'],'+254':[/^[17]\d{8}$/,'9 digits'],'+49':[/^1\d{9,10}$/,'10–11 digits starting with 1'],'+33':[/^[67]\d{8}$/,'9 digits starting with 6 or 7'],'+81':[/^[789]0\d{8}$/,'10 digits']};
+
+// ---- junk / fake-entry filters ----
+const JUNK=/^(test|testing|tester|abc|abcd|xyz|asdf|qwerty|sample|dummy|demo|na|n\/a|none|nil|null|xxx+|aaa+|user|admin|name|company|text|hello|hi|ok|no|yes)$/i;
+const TYPO=/@((gamil|gmial|gmai|gmal|gnail|gmaill|yaho|yahooo|yhoo|hotmial|hotmal|hotmai|outlok|outloook|rediff)\.(com|in|co\.in|co)|gmail\.(co|con|cm|om)|yahoo\.(co|con|cm)|hotmail\.(co|con)|outlook\.(co|con)|rediffmail\.(co|con))$/i;
+function gibberish(t,loose){const w=t.toLowerCase().replace(/[^a-z\u00C0-\u024F ]/g,'').trim(); if(!w)return false;
+  if(JUNK.test(w)||w.split(' ').every(x=>JUNK.test(x)))return true;
+  return w.split(' ').some(x=>loose?(x.length>=6&&(/[bcdfghjklmnpqrstvwxz]{6,}/.test(x)||/(.)\1\1\1/.test(x))):(x.length>=4&&(!/[aeiouy]/.test(x)||/[bcdfghjklmnpqrstvwxz]{5,}/.test(x)||/(.)\1\1/.test(x))));}
+const mxCache={};
+async function hasMail(domain){if(domain in mxCache)return mxCache[domain];
+  try{const ctl=new AbortController();setTimeout(()=>ctl.abort(),3500);
+    const r=await fetch('https://dns.google/resolve?name='+encodeURIComponent(domain)+'&type=MX',{signal:ctl.signal});const j=await r.json();
+    const ok=j.Status===0&&Array.isArray(j.Answer)&&j.Answer.some(a=>a.type===15&&!/^0 \.$/.test(a.data));
+    return mxCache[domain]=ok;}catch(e){return mxCache[domain]=true;}} // if the check itself fails, don't block the visitor
 const T0=Date.now();
 function natDigits(cc,raw,rule){let d=raw.replace(/\D/g,'').replace(/^0+/,'');const c=cc.slice(1);
   if(d.startsWith(c)&&!rule.test(d)&&rule.test(d.slice(c.length).replace(/^0+/,'')))d=d.slice(c.length).replace(/^0+/,'');
@@ -388,9 +401,9 @@ function junkNumber(d){return /^(\d)\1+$/.test(d)||'01234567890123'.includes(d)|
 function checks(){
   const name=$('#gName').value.replace(/\s+/g,' ').trim(), company=$('#gCo').value.replace(/\s+/g,' ').trim(), email=$('#gMail').value.trim().toLowerCase(), cc=$('#gCc').value, rule=MOB[cc]||[/^\d{6,14}$/,'a valid mobile number'], phone=natDigits(cc,$('#gPhone').value,rule[0]);
   return {name,company,email,cc,phone,
-    eName: name.length<2?'Please enter your full name':!/^[\p{L}][\p{L} .'’-]{1,59}$/u.test(name)?'Use letters only (no numbers or symbols)':'',
-    eCo: company.length<2?'Please enter your company name':/^[^\p{L}\d]+$/u.test(company)?'Please enter a valid company name':'',
-    eMail: !email?'Please enter your email':!/^[a-z0-9._%+'-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(email)||email.includes('..')?'Please enter a valid email, e.g. name@company.com':DISPOSABLE.test(email)?'Temporary email addresses are not accepted':'',
+    eName: name.length<2?'Please enter your full name':!/^[\p{L}][\p{L} .'’-]{1,59}$/u.test(name)?'Use letters only (no numbers or symbols)':gibberish(name)?'Please enter your real full name':!/\S+\s+\S+/.test(name)?'Please enter first and last name':'',
+    eCo: company.length<2?'Please enter your company name':/^[^\p{L}\d]+$/u.test(company)?'Please enter a valid company name':gibberish(company,true)||/^(test|text|abc|xyz|na|none|company|demo|sample|dummy)$/i.test(company)?'Please enter your real company name':'',
+    eMail: !email?'Please enter your email':!/^[a-z0-9._%+'-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(email)||email.includes('..')?'Please enter a valid email, e.g. name@company.com':DISPOSABLE.test(email)?'Temporary email addresses are not accepted':TYPO.test(email)?'Please check the spelling of your email domain':gibberish(email.split('@')[0].replace(/[._-]/g,' '))?'Please use your real email address':'',
     ePhone: !phone?'Please enter your mobile number':!rule[0].test(phone)?'Enter '+rule[1]+' (without country code)':junkNumber(phone)?'Please enter a real mobile number':''};
 }
 function bad(id,msg,show){const el=$(id),f=el.closest('.fld');if(show){f.classList.toggle('bad',!!msg);f.querySelector('.er').textContent=msg||'';el.setAttribute('aria-invalid',msg?'true':'false');}return !msg}
@@ -403,6 +416,10 @@ $('#gform').addEventListener('submit',async e=>{e.preventDefault();
   FIELDS.forEach(([id,k])=>{if(!bad(id,c[k],true)&&!first)first=id});
   $('#gOkErr').textContent=$('#gOk').checked?'':'Please tick the box to continue';
   if(first){$(first).focus();return} if(!$('#gOk').checked){$('#gOk').focus();return}
+  $('#gGo').disabled=true;$('#gGo').textContent='Checking…';
+  const dom=c.email.split('@')[1]; const mx=await hasMail(dom);
+  $('#gGo').disabled=false;$('#gGo').textContent='Unlock the catalogue →';
+  if(!mx){bad('#gMail','This email domain cannot receive email. Please use your real work email.',true);$('#gMail').focus();return}
   if($('#gHp').value||Date.now()-T0<2500){ $('#gate').hidden=true; document.body.style.overflow=''; return; } // bot: let in silently, send nothing
   const p=new URLSearchParams(location.search);
   const l={name:c.name,company:c.company,email:c.email,cc:c.cc,phone:c.phone,role:$('#gRole').value,
@@ -422,7 +439,8 @@ document.querySelectorAll('[data-gt]').forEach(b=>b.addEventListener('click',()=
   $('#gTitle').textContent=reg?'Explore 140+ TBX APIs':'Welcome back';$('#gSub').textContent=reg?'Register once to unlock the full catalogue. It takes 20 seconds.':'Sign in with the email you registered with.';
   setTimeout(()=>(reg?$('#gName'):$('#gInMail')).focus(),50);}));
 async function signIn(){const email=$('#gInMail').value.trim().toLowerCase();
-  const okMail=/^[a-z0-9._%+'-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(email)&&!email.includes('..')&&!DISPOSABLE.test(email);
+  let okMail=/^[a-z0-9._%+'-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(email)&&!email.includes('..')&&!DISPOSABLE.test(email)&&!TYPO.test(email)&&!gibberish(email.split('@')[0].replace(/[._-]/g,' '));
+  if(okMail){$('#gInGo').textContent='Checking…';okMail=await hasMail(email.split('@')[1]);$('#gInGo').textContent='Sign in →';}
   bad('#gInMail',okMail?'':'Please enter a valid email',true); if(!okMail){$('#gInMail').focus();return}
   if(Date.now()-T0<1500||$('#gHp').value){$('#gate').hidden=true;document.body.style.overflow='';return}
   const l={name:'',company:'',email,cc:'',phone:'',role:'',returning:true,at:Date.now(),sent:false,source:'Returning sign-in'};
