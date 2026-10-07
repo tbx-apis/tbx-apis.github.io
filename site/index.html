@@ -162,6 +162,9 @@ footer a{color:#D7DEF5;text-decoration:none;margin-right:16px}
 .chk input{margin-top:3px;accent-color:var(--cyan);width:16px;height:16px;flex:0 0 auto}
 .gbd .btn{justify-content:center;padding:13px;font-size:15px}
 .gnote{font-size:12px;color:var(--faint);text-align:center}
+.gtabs{display:flex;gap:6px;margin-top:16px;background:rgba(255,255,255,.08);padding:4px;border-radius:12px}
+.gtabs button{flex:1;border:0;background:transparent;color:#C9D3F0;padding:9px 8px;border-radius:9px;cursor:pointer;font-weight:600;font-size:13px}
+.gtabs button.on{background:#fff;color:var(--navy)}
 @media (max-width:520px){.row2{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -219,8 +222,14 @@ footer a{color:#D7DEF5;text-decoration:none;margin-right:16px}
 
 <div class="gate" id="gate" hidden>
   <form class="gcard" id="gform" novalidate>
-    <div class="ghd"><img src="tbx-logo.png" alt="TBX"><h2>Explore 140+ TBX APIs</h2><p>Tell us a little about you to unlock the full catalogue. It takes 20 seconds.</p></div>
-    <div class="gbd">
+    <div class="ghd"><img src="tbx-logo.png" alt="TBX"><h2 id="gTitle">Explore 140+ TBX APIs</h2><p id="gSub">Register once to unlock the full catalogue. It takes 20 seconds.</p>
+      <div class="gtabs" role="tablist"><button type="button" class="on" data-gt="reg">New here? Register</button><button type="button" data-gt="in">Already registered? Sign in</button></div></div>
+    <div class="gbd" id="gSignin" hidden>
+      <div class="fld"><label for="gInMail">Email you registered with *</label><input id="gInMail" type="email" autocomplete="email" inputmode="email" maxlength="120" placeholder="name@company.com" autocapitalize="off" spellcheck="false"><div class="er"></div></div>
+      <button class="btn cy" type="button" id="gInGo">Sign in →</button>
+      <div class="gnote">Registered on another device? Just enter your email. You stay signed in on this device.</div>
+    </div>
+    <div class="gbd" id="gReg">
       <div class="row2">
         <div class="fld"><label for="gName">Full name *</label><input id="gName" autocomplete="name" required maxlength="60" aria-describedby="eName"><div class="er"></div></div>
         <div class="fld"><label for="gCo">Company *</label><input id="gCo" autocomplete="organization" required maxlength="100"><div class="er"></div></div>
@@ -233,7 +242,7 @@ footer a{color:#D7DEF5;text-decoration:none;margin-right:16px}
       <label class="chk"><input type="checkbox" id="gOk"> <span>I agree that TBX may contact me by email, phone or WhatsApp about its APIs and services. My details are used only for this purpose and are never sold or shared.</span></label>
       <div class="er" id="gOkErr" style="color:#D14343;font-size:12px"></div>
       <button class="btn cy" type="submit" id="gGo">Unlock the catalogue →</button>
-      <div class="gnote">You will only be asked once on this device.</div>
+      <div class="gnote">One-time step. You stay signed in on this device.</div>
     </div>
   </form>
 </div>
@@ -353,7 +362,7 @@ try{const t=localStorage.getItem('tbx-theme');if(t)document.documentElement.data
 const LEAD_URL="https://formsubmit.co/ajax/"+CONTACT;
 const CC=[["+91","India"],["+971","UAE"],["+966","Saudi Arabia"],["+974","Qatar"],["+965","Kuwait"],["+968","Oman"],["+973","Bahrain"],["+65","Singapore"],["+60","Malaysia"],["+62","Indonesia"],["+66","Thailand"],["+63","Philippines"],["+84","Vietnam"],["+880","Bangladesh"],["+94","Sri Lanka"],["+977","Nepal"],["+44","UK"],["+1","USA / Canada"],["+61","Australia"],["+27","South Africa"],["+234","Nigeria"],["+254","Kenya"],["+49","Germany"],["+33","France"],["+81","Japan"]];
 function sendLead(l){return fetch(LEAD_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
-  body:JSON.stringify({_subject:'New TBX API Catalogue registration: '+l.company,_template:'table',_captcha:'false',
+  body:JSON.stringify({_subject:l.returning?('Returning visitor signed in: '+l.email):('New TBX API Catalogue registration: '+l.company),_template:'table',_captcha:'false',
     Name:l.name,Company:l.company,Email:l.email,'Email type':l.emailType||'',Mobile:l.cc+' '+l.phone,Country:l.country||'',Segment:l.role||'-',Source:l.source||'',Page:location.href,'Registered at':new Date(l.at||Date.now()).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST'})})
   .then(r=>{if(!r.ok)throw 0;l.sent=true;try{localStorage.setItem('tbx-lead',JSON.stringify(l))}catch(e){}}).catch(()=>{});}
 function gate(){
@@ -407,6 +416,23 @@ $('#gform').addEventListener('submit',async e=>{e.preventDefault();
 });
 $('#notMe').addEventListener('click',e=>{e.preventDefault();try{localStorage.removeItem('tbx-lead')}catch(x){}location.reload()});
 if(LEAD&&LEAD.email)$('#notMe').hidden=false;
+// sign-in tab for returning visitors (new device / browser)
+document.querySelectorAll('[data-gt]').forEach(b=>b.addEventListener('click',()=>{const reg=b.dataset.gt==='reg';
+  document.querySelectorAll('[data-gt]').forEach(x=>x.classList.toggle('on',x===b));$('#gReg').hidden=!reg;$('#gSignin').hidden=reg;
+  $('#gTitle').textContent=reg?'Explore 140+ TBX APIs':'Welcome back';$('#gSub').textContent=reg?'Register once to unlock the full catalogue. It takes 20 seconds.':'Sign in with the email you registered with.';
+  setTimeout(()=>(reg?$('#gName'):$('#gInMail')).focus(),50);}));
+async function signIn(){const email=$('#gInMail').value.trim().toLowerCase();
+  const okMail=/^[a-z0-9._%+'-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(email)&&!email.includes('..')&&!DISPOSABLE.test(email);
+  bad('#gInMail',okMail?'':'Please enter a valid email',true); if(!okMail){$('#gInMail').focus();return}
+  if(Date.now()-T0<1500||$('#gHp').value){$('#gate').hidden=true;document.body.style.overflow='';return}
+  const l={name:'',company:'',email,cc:'',phone:'',role:'',returning:true,at:Date.now(),sent:false,source:'Returning sign-in'};
+  $('#gInGo').disabled=true;$('#gInGo').textContent='Signing in…';
+  try{localStorage.setItem('tbx-lead',JSON.stringify(l))}catch(e){} LEAD=l;
+  await Promise.race([sendLead(l),new Promise(r=>setTimeout(r,2000))]);
+  $('#gate').hidden=true;document.body.style.overflow='';$('#notMe').hidden=false;$$('[data-mail]').forEach(a=>a.href=mail(''));toast('Welcome back! The full catalogue is unlocked.');}
+$('#gInGo').addEventListener('click',signIn);
+$('#gInMail').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();signIn()}});
+
 gate();
 
 load();
