@@ -142,6 +142,27 @@ footer img{height:38px}
 footer a{color:#D7DEF5;text-decoration:none;margin-right:16px}
 .theme{background:transparent;border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;width:36px;height:36px;cursor:pointer}
 @media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.nav .links a.hide{display:none}.wrap{padding:0 16px}.hsearch kbd{display:none}.hsearch input{padding-right:16px}}
+
+/* registration gate */
+.gate{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:16px;background:rgba(5,11,44,.62);backdrop-filter:blur(7px);overflow:auto}
+.gate[hidden]{display:none}
+.gcard{background:var(--panel);color:var(--ink);width:min(520px,100%);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.4);overflow:hidden}
+.ghd{background:var(--navy);color:#fff;padding:22px 24px 18px;position:relative}
+.ghd img{height:40px;display:block;margin-bottom:12px}
+.ghd h2{margin:0 0 4px;font-size:22px;letter-spacing:-.3px}.ghd p{margin:0;color:#C9D3F0;font-size:14px}
+.gbd{padding:20px 24px 22px;display:grid;gap:12px}
+.fld label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.fld input,.fld select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--ink);font:inherit}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--cyan)}
+.fld.bad input{border-color:#D14343}
+.fld .er{color:#D14343;font-size:12px;margin-top:4px;min-height:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.phone{display:grid;grid-template-columns:118px 1fr;gap:8px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted)}
+.chk input{margin-top:3px;accent-color:var(--cyan);width:16px;height:16px;flex:0 0 auto}
+.gbd .btn{justify-content:center;padding:13px;font-size:15px}
+.gnote{font-size:12px;color:var(--faint);text-align:center}
+@media (max-width:520px){.row2{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -195,6 +216,26 @@ footer a{color:#D7DEF5;text-decoration:none;margin-right:16px}
   <div>© TBX (formerly TransBnk). Availability subject to use case and regulatory approval. Pricing on request.</div>
 </div></footer>
 
+
+<div class="gate" id="gate" hidden>
+  <form class="gcard" id="gform" novalidate>
+    <div class="ghd"><img src="__LOGO__" alt="TBX"><h2>Explore 140+ TBX APIs</h2><p>Tell us a little about you to unlock the full catalogue. It takes 20 seconds.</p></div>
+    <div class="gbd">
+      <div class="row2">
+        <div class="fld"><label for="gName">Full name *</label><input id="gName" autocomplete="name" required><div class="er"></div></div>
+        <div class="fld"><label for="gCo">Company *</label><input id="gCo" autocomplete="organization" required><div class="er"></div></div>
+      </div>
+      <div class="fld"><label for="gMail">Work email *</label><input id="gMail" type="email" autocomplete="email" inputmode="email" required placeholder="name@company.com"><div class="er"></div></div>
+      <div class="fld"><label for="gPhone">Mobile number *</label>
+        <div class="phone"><select id="gCc" aria-label="Country code"></select><input id="gPhone" type="tel" autocomplete="tel-national" inputmode="tel" required placeholder="98765 43210"></div><div class="er"></div></div>
+      <div class="fld"><label for="gRole">I am exploring APIs for</label><select id="gRole"><option value="">Select (optional)</option><option>Bank</option><option>NBFC / Lender</option><option>Fintech / Payments</option><option>Insurance</option><option>Enterprise / Corporate</option><option>Marketplace / Platform</option><option>Other</option></select></div>
+      <label class="chk"><input type="checkbox" id="gOk"> <span>I agree that TBX may contact me about its APIs and services. We never share your details.</span></label>
+      <div class="er" id="gOkErr" style="color:#D14343;font-size:12px"></div>
+      <button class="btn cy" type="submit" id="gGo">Unlock the catalogue →</button>
+      <div class="gnote">Already registered on this device? You won't be asked again.</div>
+    </div>
+  </form>
+</div>
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" aria-hidden="true">
   <div class="dh" id="dHead"></div>
@@ -208,10 +249,11 @@ footer a{color:#D7DEF5;text-decoration:none;margin-right:16px}
 <script type="application/json" id="seed">__SEED__</script>
 <script>
 const CONTACT="__CONTACT__";
+let LEAD=null; try{LEAD=JSON.parse(localStorage.getItem('tbx-lead')||'null')}catch(e){}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const slug=s=>String(s).toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-const mail=api=>'mailto:'+CONTACT+'?subject='+encodeURIComponent(api?('TBX API enquiry: '+api):'TBX API enquiry')+'&body='+encodeURIComponent((api?'Hi TBX team,\n\nI would like details and pricing for: '+api+'\n\n':'Hi TBX team,\n\n')+'Company:\nUse case:\nExpected monthly volume:\nPreferred contact number:\n');
+const mail=api=>'mailto:'+CONTACT+'?subject='+encodeURIComponent(api?('TBX API enquiry: '+api):'TBX API enquiry')+'&body='+encodeURIComponent((api?'Hi TBX team,\n\nI would like details and pricing for: '+api+'\n\n':'Hi TBX team,\n\n')+'Name: '+((LEAD&&LEAD.name)||'')+'\nCompany: '+((LEAD&&LEAD.company)||'')+'\nMobile: '+(LEAD?LEAD.cc+' '+LEAD.phone:'')+'\nUse case:\nExpected monthly volume:\n');
 const ICONS={
  'Identity & Individual KYC':'<path d="M4 5h16v14H4z"/><circle cx="9" cy="11" r="2.2"/><path d="M6 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4M14 9h4M14 12h4M14 15h3"/>',
  'Business & KYB':'<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 10h.01M15 10h.01M12 10h.01"/>',
@@ -306,6 +348,35 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#drawer').classL
 window.addEventListener('hashchange',()=>{const h=decodeURIComponent(location.hash.slice(1));if(h&&API.some(a=>a.id===h))openApi(h,false);});
 $('#themeBtn').addEventListener('click',()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark';try{localStorage.setItem('tbx-theme',r.dataset.theme)}catch(e){}});
 try{const t=localStorage.getItem('tbx-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}
+// ---- mandatory registration (lead capture) ----
+const LEAD_URL="https://formsubmit.co/ajax/"+CONTACT;
+const CC=[["+91","India"],["+971","UAE"],["+966","Saudi Arabia"],["+974","Qatar"],["+965","Kuwait"],["+968","Oman"],["+973","Bahrain"],["+65","Singapore"],["+60","Malaysia"],["+62","Indonesia"],["+66","Thailand"],["+63","Philippines"],["+84","Vietnam"],["+880","Bangladesh"],["+94","Sri Lanka"],["+977","Nepal"],["+44","UK"],["+1","USA / Canada"],["+61","Australia"],["+27","South Africa"],["+234","Nigeria"],["+254","Kenya"],["+49","Germany"],["+33","France"],["+81","Japan"]];
+function sendLead(l){return fetch(LEAD_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
+  body:JSON.stringify({_subject:'New TBX API Catalogue registration: '+l.company,_template:'table',_captcha:'false',
+    Name:l.name,Company:l.company,Email:l.email,Mobile:l.cc+' '+l.phone,Segment:l.role||'-',Page:location.href,Time:new Date().toISOString()})})
+  .then(r=>{if(!r.ok)throw 0;l.sent=true;try{localStorage.setItem('tbx-lead',JSON.stringify(l))}catch(e){}}).catch(()=>{});}
+function gate(){
+  if(LEAD&&LEAD.email){ if(!LEAD.sent) sendLead(LEAD); return; }
+  $('#gCc').innerHTML=CC.map(c=>'<option value="'+c[0]+'">'+c[0]+' '+c[1]+'</option>').join('');
+  $('#gate').hidden=false; document.body.style.overflow='hidden'; setTimeout(()=>$('#gName').focus(),80);
+}
+function bad(id,msg){const f=$(id).closest('.fld');f.classList.toggle('bad',!!msg);f.querySelector('.er').textContent=msg||'';return !msg}
+$('#gform').addEventListener('submit',async e=>{e.preventDefault();
+  const name=$('#gName').value.trim(),company=$('#gCo').value.trim(),email=$('#gMail').value.trim().toLowerCase(),cc=$('#gCc').value,phone=$('#gPhone').value.replace(/[^0-9]/g,''),role=$('#gRole').value;
+  let ok=bad('#gName',name.length<2?'Please enter your name':'');
+  ok=bad('#gCo',company.length<2?'Please enter your company':'')&&ok;
+  ok=bad('#gMail',/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)?'':'Please enter a valid email')&&ok;
+  ok=bad('#gPhone',(cc==='+91'?/^[6-9][0-9]{9}$/.test(phone):phone.length>=6&&phone.length<=14)?'':(cc==='+91'?'Enter a valid 10-digit mobile number':'Enter a valid mobile number'))&&ok;
+  $('#gOkErr').textContent=$('#gOk').checked?'':'Please tick the box to continue'; ok=$('#gOk').checked&&ok;
+  if(!ok)return;
+  const l={name,company,email,cc,phone,role,at:Date.now(),sent:false};
+  $('#gGo').disabled=true;$('#gGo').textContent='Unlocking…';
+  try{localStorage.setItem('tbx-lead',JSON.stringify(l))}catch(e){} LEAD=l;
+  await Promise.race([sendLead(l),new Promise(r=>setTimeout(r,2500))]);
+  $('#gate').hidden=true; document.body.style.overflow=''; $$('[data-mail]').forEach(a=>a.href=mail('')); toast('Welcome, '+name.split(' ')[0]+'! The full catalogue is unlocked.');
+});
+gate();
+
 load();
 </script>
 </body>
