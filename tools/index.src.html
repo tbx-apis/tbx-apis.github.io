@@ -212,7 +212,7 @@ footer a{color:#D7DEF5;text-decoration:none;margin-right:16px}
 
 <footer><div class="wrap">
   <img src="__LOGO__" alt="TBX">
-  <div><a href="https://www.tbx.co.in/" target="_blank" rel="noopener">tbx.co.in</a><a href="https://www.tbx.co.in/contact-us" target="_blank" rel="noopener">Contact us</a><span id="upd"></span></div>
+  <div><a href="https://www.tbx.co.in/" target="_blank" rel="noopener">tbx.co.in</a><a href="https://www.tbx.co.in/contact-us" target="_blank" rel="noopener">Contact us</a><span id="upd"></span> <a href="#" id="notMe" hidden>Not you? Change details</a></div>
   <div>© TBX (formerly TransBnk). Availability subject to use case and regulatory approval. Pricing on request.</div>
 </div></footer>
 
@@ -222,17 +222,18 @@ footer a{color:#D7DEF5;text-decoration:none;margin-right:16px}
     <div class="ghd"><img src="__LOGO__" alt="TBX"><h2>Explore 140+ TBX APIs</h2><p>Tell us a little about you to unlock the full catalogue. It takes 20 seconds.</p></div>
     <div class="gbd">
       <div class="row2">
-        <div class="fld"><label for="gName">Full name *</label><input id="gName" autocomplete="name" required><div class="er"></div></div>
-        <div class="fld"><label for="gCo">Company *</label><input id="gCo" autocomplete="organization" required><div class="er"></div></div>
+        <div class="fld"><label for="gName">Full name *</label><input id="gName" autocomplete="name" required maxlength="60" aria-describedby="eName"><div class="er"></div></div>
+        <div class="fld"><label for="gCo">Company *</label><input id="gCo" autocomplete="organization" required maxlength="100"><div class="er"></div></div>
       </div>
-      <div class="fld"><label for="gMail">Work email *</label><input id="gMail" type="email" autocomplete="email" inputmode="email" required placeholder="name@company.com"><div class="er"></div></div>
+      <div class="fld"><label for="gMail">Work email *</label><input id="gMail" type="email" autocomplete="email" inputmode="email" required maxlength="120" placeholder="name@company.com" autocapitalize="off" spellcheck="false"><div class="er"></div></div>
       <div class="fld"><label for="gPhone">Mobile number *</label>
-        <div class="phone"><select id="gCc" aria-label="Country code"></select><input id="gPhone" type="tel" autocomplete="tel-national" inputmode="tel" required placeholder="98765 43210"></div><div class="er"></div></div>
+        <div class="phone"><select id="gCc" aria-label="Country code"></select><input id="gPhone" type="tel" autocomplete="tel-national" inputmode="tel" required maxlength="18" placeholder="98765 43210"></div><div class="er"></div></div>
       <div class="fld"><label for="gRole">I am exploring APIs for</label><select id="gRole"><option value="">Select (optional)</option><option>Bank</option><option>NBFC / Lender</option><option>Fintech / Payments</option><option>Insurance</option><option>Enterprise / Corporate</option><option>Marketplace / Platform</option><option>Other</option></select></div>
-      <label class="chk"><input type="checkbox" id="gOk"> <span>I agree that TBX may contact me about its APIs and services. We never share your details.</span></label>
+      <input type="text" id="gHp" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+      <label class="chk"><input type="checkbox" id="gOk"> <span>I agree that TBX may contact me by email, phone or WhatsApp about its APIs and services. My details are used only for this purpose and are never sold or shared.</span></label>
       <div class="er" id="gOkErr" style="color:#D14343;font-size:12px"></div>
       <button class="btn cy" type="submit" id="gGo">Unlock the catalogue →</button>
-      <div class="gnote">Already registered on this device? You won't be asked again.</div>
+      <div class="gnote">You will only be asked once on this device.</div>
     </div>
   </form>
 </div>
@@ -353,28 +354,59 @@ const LEAD_URL="https://formsubmit.co/ajax/"+CONTACT;
 const CC=[["+91","India"],["+971","UAE"],["+966","Saudi Arabia"],["+974","Qatar"],["+965","Kuwait"],["+968","Oman"],["+973","Bahrain"],["+65","Singapore"],["+60","Malaysia"],["+62","Indonesia"],["+66","Thailand"],["+63","Philippines"],["+84","Vietnam"],["+880","Bangladesh"],["+94","Sri Lanka"],["+977","Nepal"],["+44","UK"],["+1","USA / Canada"],["+61","Australia"],["+27","South Africa"],["+234","Nigeria"],["+254","Kenya"],["+49","Germany"],["+33","France"],["+81","Japan"]];
 function sendLead(l){return fetch(LEAD_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
   body:JSON.stringify({_subject:'New TBX API Catalogue registration: '+l.company,_template:'table',_captcha:'false',
-    Name:l.name,Company:l.company,Email:l.email,Mobile:l.cc+' '+l.phone,Segment:l.role||'-',Page:location.href,Time:new Date().toISOString()})})
+    Name:l.name,Company:l.company,Email:l.email,'Email type':l.emailType||'',Mobile:l.cc+' '+l.phone,Country:l.country||'',Segment:l.role||'-',Source:l.source||'',Page:location.href,'Registered at':new Date(l.at||Date.now()).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST'})})
   .then(r=>{if(!r.ok)throw 0;l.sent=true;try{localStorage.setItem('tbx-lead',JSON.stringify(l))}catch(e){}}).catch(()=>{});}
 function gate(){
   if(LEAD&&LEAD.email){ if(!LEAD.sent) sendLead(LEAD); return; }
   $('#gCc').innerHTML=CC.map(c=>'<option value="'+c[0]+'">'+c[0]+' '+c[1]+'</option>').join('');
   $('#gate').hidden=false; document.body.style.overflow='hidden'; setTimeout(()=>$('#gName').focus(),80);
 }
-function bad(id,msg){const f=$(id).closest('.fld');f.classList.toggle('bad',!!msg);f.querySelector('.er').textContent=msg||'';return !msg}
+const DISPOSABLE=/@(mailinator|guerrillamail|10minutemail|tempmail|temp-mail|yopmail|trashmail|getnada|sharklasers|dispostable|maildrop|throwawaymail|fakeinbox|mintemail|moakt|emailondeck)\./i;
+const FREE=/@(gmail|yahoo|ymail|hotmail|outlook|live|msn|icloud|me|aol|rediffmail|proton|protonmail|zoho|gmx|mail|yandex)\.[a-z.]+$/i;
+// mobile rules: [regex on national digits, hint]
+const MOB={'+91':[/^[6-9]\d{9}$/,'10 digits starting with 6, 7, 8 or 9'],'+971':[/^5\d{8}$/,'9 digits starting with 5'],'+966':[/^5\d{8}$/,'9 digits starting with 5'],
+ '+974':[/^[3567]\d{7}$/,'8 digits'],'+965':[/^[569]\d{7}$/,'8 digits'],'+968':[/^[79]\d{7}$/,'8 digits'],'+973':[/^[36]\d{7}$/,'8 digits'],'+65':[/^[89]\d{7}$/,'8 digits starting with 8 or 9'],
+ '+60':[/^1\d{8,9}$/,'9–10 digits starting with 1'],'+62':[/^8\d{8,11}$/,'9–12 digits starting with 8'],'+66':[/^[689]\d{8}$/,'9 digits'],'+63':[/^9\d{9}$/,'10 digits starting with 9'],
+ '+84':[/^[35789]\d{8}$/,'9 digits'],'+880':[/^1\d{9}$/,'10 digits starting with 1'],'+94':[/^7\d{8}$/,'9 digits starting with 7'],'+977':[/^9\d{9}$/,'10 digits starting with 9'],
+ '+44':[/^7\d{9}$/,'10 digits starting with 7'],'+1':[/^[2-9]\d{9}$/,'10 digits'],'+61':[/^4\d{8}$/,'9 digits starting with 4'],'+27':[/^[678]\d{8}$/,'9 digits'],
+ '+234':[/^[789]\d{9}$/,'10 digits'],'+254':[/^[17]\d{8}$/,'9 digits'],'+49':[/^1\d{9,10}$/,'10–11 digits starting with 1'],'+33':[/^[67]\d{8}$/,'9 digits starting with 6 or 7'],'+81':[/^[789]0\d{8}$/,'10 digits']};
+const T0=Date.now();
+function natDigits(cc,raw,rule){let d=raw.replace(/\D/g,'').replace(/^0+/,'');const c=cc.slice(1);
+  if(d.startsWith(c)&&!rule.test(d)&&rule.test(d.slice(c.length).replace(/^0+/,'')))d=d.slice(c.length).replace(/^0+/,'');
+  else if(raw.trim().startsWith('+')&&d.startsWith(c))d=d.slice(c.length).replace(/^0+/,'');
+  return d;}
+function junkNumber(d){return /^(\d)\1+$/.test(d)||'01234567890123'.includes(d)||'98765432109876'.includes(d)}
+function checks(){
+  const name=$('#gName').value.replace(/\s+/g,' ').trim(), company=$('#gCo').value.replace(/\s+/g,' ').trim(), email=$('#gMail').value.trim().toLowerCase(), cc=$('#gCc').value, rule=MOB[cc]||[/^\d{6,14}$/,'a valid mobile number'], phone=natDigits(cc,$('#gPhone').value,rule[0]);
+  return {name,company,email,cc,phone,
+    eName: name.length<2?'Please enter your full name':!/^[\p{L}][\p{L} .'’-]{1,59}$/u.test(name)?'Use letters only (no numbers or symbols)':'',
+    eCo: company.length<2?'Please enter your company name':/^[^\p{L}\d]+$/u.test(company)?'Please enter a valid company name':'',
+    eMail: !email?'Please enter your email':!/^[a-z0-9._%+'-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(email)||email.includes('..')?'Please enter a valid email, e.g. name@company.com':DISPOSABLE.test(email)?'Temporary email addresses are not accepted':'',
+    ePhone: !phone?'Please enter your mobile number':!rule[0].test(phone)?'Enter '+rule[1]+' (without country code)':junkNumber(phone)?'Please enter a real mobile number':''};
+}
+function bad(id,msg,show){const el=$(id),f=el.closest('.fld');if(show){f.classList.toggle('bad',!!msg);f.querySelector('.er').textContent=msg||'';el.setAttribute('aria-invalid',msg?'true':'false');}return !msg}
+const FIELDS=[['#gName','eName'],['#gCo','eCo'],['#gMail','eMail'],['#gPhone','ePhone']];
+FIELDS.forEach(([id,k])=>{$(id).addEventListener('blur',()=>{if($(id).value.trim())bad(id,checks()[k],true)});$(id).addEventListener('input',()=>{if($(id).closest('.fld').classList.contains('bad'))bad(id,checks()[k],true)})});
+$('#gCc').addEventListener('change',()=>{const r=MOB[$('#gCc').value];$('#gPhone').placeholder=r?r[1].replace(/ \(.*/,''):'Mobile number';if($('#gPhone').value.trim())bad('#gPhone',checks().ePhone,true)});
 $('#gform').addEventListener('submit',async e=>{e.preventDefault();
-  const name=$('#gName').value.trim(),company=$('#gCo').value.trim(),email=$('#gMail').value.trim().toLowerCase(),cc=$('#gCc').value,phone=$('#gPhone').value.replace(/[^0-9]/g,''),role=$('#gRole').value;
-  let ok=bad('#gName',name.length<2?'Please enter your name':'');
-  ok=bad('#gCo',company.length<2?'Please enter your company':'')&&ok;
-  ok=bad('#gMail',/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)?'':'Please enter a valid email')&&ok;
-  ok=bad('#gPhone',(cc==='+91'?/^[6-9][0-9]{9}$/.test(phone):phone.length>=6&&phone.length<=14)?'':(cc==='+91'?'Enter a valid 10-digit mobile number':'Enter a valid mobile number'))&&ok;
-  $('#gOkErr').textContent=$('#gOk').checked?'':'Please tick the box to continue'; ok=$('#gOk').checked&&ok;
-  if(!ok)return;
-  const l={name,company,email,cc,phone,role,at:Date.now(),sent:false};
+  if($('#gGo').disabled)return;
+  const c=checks(); let first=null;
+  FIELDS.forEach(([id,k])=>{if(!bad(id,c[k],true)&&!first)first=id});
+  $('#gOkErr').textContent=$('#gOk').checked?'':'Please tick the box to continue';
+  if(first){$(first).focus();return} if(!$('#gOk').checked){$('#gOk').focus();return}
+  if($('#gHp').value||Date.now()-T0<2500){ $('#gate').hidden=true; document.body.style.overflow=''; return; } // bot: let in silently, send nothing
+  const p=new URLSearchParams(location.search);
+  const l={name:c.name,company:c.company,email:c.email,cc:c.cc,phone:c.phone,role:$('#gRole').value,
+    country:($('#gCc').selectedOptions[0]||{}).textContent||'',emailType:FREE.test(c.email)?'Personal (free email)':'Work',
+    source:[p.get('utm_source'),p.get('utm_medium'),p.get('utm_campaign')].filter(Boolean).join(' / ')||document.referrer||'Direct',at:Date.now(),sent:false};
   $('#gGo').disabled=true;$('#gGo').textContent='Unlocking…';
   try{localStorage.setItem('tbx-lead',JSON.stringify(l))}catch(e){} LEAD=l;
   await Promise.race([sendLead(l),new Promise(r=>setTimeout(r,2500))]);
-  $('#gate').hidden=true; document.body.style.overflow=''; $$('[data-mail]').forEach(a=>a.href=mail('')); toast('Welcome, '+name.split(' ')[0]+'! The full catalogue is unlocked.');
+  $('#gate').hidden=true; document.body.style.overflow=''; $('#notMe').hidden=false;
+  $$('[data-mail]').forEach(a=>a.href=mail('')); toast('Welcome, '+c.name.split(' ')[0]+'! The full catalogue is unlocked.');
 });
+$('#notMe').addEventListener('click',e=>{e.preventDefault();try{localStorage.removeItem('tbx-lead')}catch(x){}location.reload()});
+if(LEAD&&LEAD.email)$('#notMe').hidden=false;
 gate();
 
 load();
