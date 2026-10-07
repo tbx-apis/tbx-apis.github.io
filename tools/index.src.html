@@ -168,6 +168,7 @@ footer a{color:#D7DEF5;text-decoration:none;margin-right:16px}
 @media (max-width:520px){.row2{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
+<script data-goatcounter="https://tbx-apis.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
 <header class="hero">
@@ -277,6 +278,11 @@ const ICONS={
 const icon=c=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[c]||'<circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/>')+'</svg>';
 let API=[],UPD='',cat='',avail='all',cmp=new Set(),lastFocus=null;
 const state=()=>({q:$('#q').value.trim().toLowerCase(),ind:$('#ind').value,sort:$('#sort').value});
+
+// ---- analytics (GoatCounter: anonymous, no cookies, no personal data sent) ----
+function gc(path,title){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:path.slice(0,200),title:(title||path).slice(0,200),event:true});}catch(e){}}
+let gcT=null;
+function gcSearch(q,n){clearTimeout(gcT);if(!q||q.length<2)return;gcT=setTimeout(()=>gc((n?'search/':'search-no-results/')+q.toLowerCase(),(n?'Search: ':'No results: ')+q),1500);}
 function hl(t,q){t=esc(t);if(!q)return t;const i=t.toLowerCase().indexOf(esc(q));return i<0?t:t.slice(0,i)+'<mark>'+t.slice(i,i+esc(q).length)+'</mark>'+t.slice(i+esc(q).length)}
 function score(a,q){if(!q)return 0;const n=a.n.toLowerCase();return n===q?100:n.startsWith(q)?60:n.includes(q)?40:(a.s||'').toLowerCase().includes(q)?20:5}
 function filtered(){const {q,ind,sort}=state();
@@ -292,7 +298,7 @@ function render(){const {q,ind}=state();const l=filtered();
    +'<p>'+hl(a.u||a.d,q)+'</p>'
    +'<div class="tags">'+(a.i||'').split(',').map(x=>x.trim()).filter(Boolean).slice(0,3).map(x=>'<span class="t">'+esc(x)+'</span>').join('')+'</div>'
    +'<div class="ft"><label class="cmp" onclick="event.stopPropagation()"><input type="checkbox" data-cmp="'+a.id+'"'+(cmp.has(a.id)?' checked':'')+'> Compare</label><span class="more">View details →</span></div></article>').join('');
-  $('#empty').hidden=l.length>0;}
+  $('#empty').hidden=l.length>0; gcSearch(q,l.length);}
 function tabs(){const cats=[...new Set(API.map(a=>a.c))].sort((x,y)=>API.filter(a=>a.c===y).length-API.filter(a=>a.c===x).length);
   $('#tabs').innerHTML='<button class="tab'+(cat?'':' on')+'" data-c="" role="tab">All <span class="n">'+API.length+'</span></button>'+cats.map(c=>'<button class="tab'+(cat===c?' on':'')+'" data-c="'+esc(c)+'" role="tab">'+esc(c)+' <span class="n">'+API.filter(a=>a.c===c).length+'</span></button>').join('');}
 function count(el,to){const t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/900);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
@@ -302,7 +308,7 @@ function kpis(){const live=API.filter(a=>a.a).length,cats=new Set(API.map(a=>a.c
   $$('#kpis b').forEach(b=>count(b,+b.dataset.to));}
 function sugs(){const s=['PAN','GST','Bank account','Vehicle RC','Credit bureau','AML','Face match','eSign'];$('#sugs').innerHTML=s.map(x=>'<button data-s="'+esc(x)+'">'+esc(x)+'</button>').join('');}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800)}
-function openApi(id,push=true){const a=API.find(x=>x.id===id);if(!a)return;lastFocus=document.activeElement;
+function openApi(id,push=true){const a=API.find(x=>x.id===id);if(!a)return;lastFocus=document.activeElement;gc('api/'+a.id,'API opened: '+a.n);
   $('#dHead').innerHTML='<button class="x" id="dClose" aria-label="Close">×</button><span class="st '+(a.a?'ok':'soon')+'" style="margin:0">'+(a.a?'Available now':'Coming soon')+'</span><h2 id="dTitle">'+esc(a.n)+'</h2><div class="cat">'+esc(a.c)+(a.s?' · '+esc(a.s):'')+'</div>';
   $('#dBody').innerHTML=(a.d?'<div class="sec"><h4>What it does</h4><p>'+esc(a.d)+'</p></div>':'')+(a.u?'<div class="sec"><h4>Typical use case</h4><p>'+esc(a.u)+'</p></div>':'')
    +(a.t?'<div class="sec"><h4>Built for</h4><p>'+esc(a.t)+'</p></div>':'')+(a.i?'<div class="sec"><h4>Industries</h4><div class="tags">'+a.i.split(',').map(x=>'<span class="t">'+esc(x.trim())+'</span>').join('')+'</div></div>':'')
@@ -320,7 +326,7 @@ function closeApi(){$('#drawer').classList.remove('on');$('#drawer').setAttribut
   if(location.hash) history.replaceState(null,'',location.pathname+location.search); if(lastFocus&&lastFocus.focus) lastFocus.focus();}
 function tray(){const on=cmp.size>0;$('#tray').classList.toggle('on',on);$('#fab').classList.toggle('up',on);
   $('#trayChips').innerHTML=[...cmp].map(id=>'<span>'+esc((API.find(a=>a.id===id)||{}).n)+'</span>').join('');$('#cmpGo').textContent='Compare ('+cmp.size+')';}
-function compare(){const l=[...cmp].map(id=>API.find(a=>a.id===id)).filter(Boolean);lastFocus=document.activeElement;
+function compare(){const l=[...cmp].map(id=>API.find(a=>a.id===id)).filter(Boolean);gc('compare/'+l.map(a=>a.id).join('+'),'Compared: '+l.map(a=>a.n).join(' vs '));lastFocus=document.activeElement;
   const row=(h,f)=>'<tr><th>'+h+'</th>'+l.map(a=>'<td>'+f(a)+'</td>').join('')+'</tr>';
   $('#dHead').innerHTML='<button class="x" id="dClose" aria-label="Close">×</button><h2 id="dTitle">Compare APIs</h2><div class="cat">'+l.length+' selected</div>';
   $('#dBody').innerHTML='<div class="cmpwrap" style="margin-top:14px"><table class="ct">'+row('API',a=>'<b>'+esc(a.n)+'</b>')+row('Status',a=>'<span class="st '+(a.a?'ok':'soon')+'" style="margin:0">'+(a.a?'Available':'Coming soon')+'</span>')
@@ -344,7 +350,7 @@ $('#hq').addEventListener('input',e=>syncQ(e.target.value,'hq'));
 $('#hq').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('catalogue').scrollIntoView();}});
 $('#sugs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;syncQ(b.dataset.s,'');document.getElementById('catalogue').scrollIntoView();});
 $('#ind').addEventListener('change',render);$('#sort').addEventListener('change',render);
-$('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;cat=b.dataset.c;tabs();render();});
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;cat=b.dataset.c;tabs();render();if(cat)gc('category/'+slug(cat),'Category: '+cat);});
 document.querySelector('.seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;avail=b.dataset.v;$$('.seg button').forEach(x=>x.classList.toggle('on',x===b));render();});
 $('#clear').addEventListener('click',()=>{syncQ('','');$('#ind').value='';cat='';avail='all';$$('.seg button').forEach((x,i)=>x.classList.toggle('on',i===0));tabs();render();});
 $('#grid').addEventListener('click',e=>{const c=e.target.closest('.card');if(c)openApi(c.dataset.id)});
@@ -428,7 +434,7 @@ $('#gform').addEventListener('submit',async e=>{e.preventDefault();
   $('#gGo').disabled=true;$('#gGo').textContent='Unlocking…';
   try{localStorage.setItem('tbx-lead',JSON.stringify(l))}catch(e){} LEAD=l;
   await Promise.race([sendLead(l),new Promise(r=>setTimeout(r,2500))]);
-  $('#gate').hidden=true; document.body.style.overflow=''; $('#notMe').hidden=false;
+  $('#gate').hidden=true; document.body.style.overflow=''; $('#notMe').hidden=false; gc('registered/'+(slug(l.role||'not-given')),'Registered: '+(l.role||'segment not given')+' · '+(l.country||''));
   $$('[data-mail]').forEach(a=>a.href=mail('')); toast('Welcome, '+c.name.split(' ')[0]+'! The full catalogue is unlocked.');
 });
 $('#notMe').addEventListener('click',e=>{e.preventDefault();try{localStorage.removeItem('tbx-lead')}catch(x){}location.reload()});
@@ -453,6 +459,7 @@ $('#gInMail').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefaul
 
 gate();
 
+document.addEventListener('click',e=>{const a=e.target.closest('a[href^="mailto:"]');if(!a)return;const m=decodeURIComponent(a.href).match(/subject=TBX API enquiry: ([^&]*)/);gc('contact-sales/'+(m?slug(m[1]):'general'),'Contact sales: '+(m?m[1]:'general'));});
 load();
 </script>
 </body>
