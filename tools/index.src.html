@@ -166,6 +166,12 @@ footer a{color:#D7DEF5;text-decoration:none;margin-right:16px}
 .gtabs button{flex:1;border:0;background:transparent;color:#C9D3F0;padding:9px 8px;border-radius:9px;cursor:pointer;font-weight:600;font-size:13px}
 .gtabs button.on{background:#fff;color:var(--navy)}
 @media (max-width:520px){.row2{grid-template-columns:1fr}}
+.smpbar{display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px}
+.seg.sm button{padding:6px 12px;font-size:13px}
+.cpy{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;padding:6px 12px;cursor:pointer;font-size:13px}
+.cpy:hover{border-color:var(--cyan);color:var(--cyan)}
+pre.code{margin:0;background:#0A1338;color:#D7E3FF;border-radius:12px;padding:14px 16px;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:auto;max-height:340px;white-space:pre}
+.smpnote{font-size:12px;color:var(--faint);margin-top:6px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 <script data-goatcounter="https://tbx-apis.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -283,6 +289,111 @@ const state=()=>({q:$('#q').value.trim().toLowerCase(),ind:$('#ind').value,sort:
 function gc(path,title){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:path.slice(0,200),title:(title||path).slice(0,200),event:true});}catch(e){}}
 let gcT=null;
 function gcSearch(q,n){clearTimeout(gcT);if(!q||q.length<2)return;gcT=setTimeout(()=>gc((n?'search/':'search-no-results/')+q.toLowerCase(),(n?'Search: ':'No results: ')+q),1500);}
+// ---- sample request / response (TBX-neutral, dummy or masked values only) ----
+const GRP={'Identity & Individual KYC':'kyc','Business & KYB':'kyb','Banking & Payments':'banking','Risk, Fraud & Background':'risk','Asset Verification':'asset','Employment & Income':'employment','Contactability & Digital Risk':'contact','Credit & Alternate Data':'credit','eSign & Document Workflow':'esign'};
+const D={pan:'ABCDE1234F',name:'SAMPLE NAME',mob:'98XXXXXX10',gstin:'27ABCDE1234F1Z5',cin:'U72900MH2020PTC000001',acct:'XXXXXXXX1234',ifsc:'ABCD0001234',vpa:'sample@upi',rc:'MH01AB1234',aad:'XXXX XXXX 1234',addr:'Flat 1, Sample Street, Mumbai, Maharashtra 400001'};
+// spec-backed (fields as in the TBX API specification, values masked)
+const SPEC={
+ 'PAN Basic Verification':[{pan:D.pan},{user_full_name:D.name,pan_status:'VALID',pan_number:D.pan,pan_type:'Individual'}],
+ 'PAN to Name and DOB Lookup':[{pan:D.pan},{pan:D.pan,firstName:'SAMPLE',midName:'',lastName:'NAME',full_name:D.name,dob:'01-01-1990',category:'person'}]};
+// illustrative templates: first matching rule wins
+const RULES=[
+ [/father/i,{pan:D.pan},{pan:D.pan,father_name:'SAMPLE FATHER NAME'}],
+ [/aadhaar.?pan|pan.?aadhaar|pan–aadhaar/i,{pan:D.pan},{pan:D.pan,aadhaar_linked:true,link_status:'Linked'}],
+ [/\bpan\b.*\bgst/i,{pan:D.pan},{pan:D.pan,gstin_list:[{gstin:D.gstin,state:'Maharashtra',status:'Active'}]}],
+ [/\bpan\b.*\bcin\b/i,{pan:D.pan},{cin:D.cin,company_name:'SAMPLE PRIVATE LIMITED'}],
+ [/name.to.cin|name-based search/i,{company_name:'Sample Private Limited'},{matches:[{cin:D.cin,company_name:'SAMPLE PRIVATE LIMITED',status:'Active'}]}],
+ [/llpin/i,{llpin:'AAA-0001'},{llp_name:'SAMPLE LLP',status:'Active',incorporation_date:'01-04-2019'}],
+ [/cin to pan/i,{cin:D.cin},{cin:D.cin,pan:D.pan}],
+ [/\bpan\b.*\bdin\b/i,{pan:D.pan},{din:'01234567',director_name:D.name}],
+ [/\bpan\b.*udyam/i,{pan:D.pan},{udyam_number:'UDYAM-MH-00-0000001',enterprise_name:'SAMPLE ENTERPRISES',category:'Micro'}],
+ [/\bpan\b.*\buan\b/i,{pan:D.pan},{uan_list:['1000XXXXXX01'],current_employer:'SAMPLE TECHNOLOGIES PVT LTD'}],
+ [/\bpan\b.*bank/i,{pan:D.pan,account_number:D.acct,ifsc:D.ifsc},{pan_name:D.name,bank_name:D.name,name_match:true,match_score:96}],
+ [/26as|financial history/i,{pan:D.pan,financial_year:'2025-26'},{pan:D.pan,total_tds:45000,deductor_count:2}],
+ [/mutual fund/i,{pan:D.pan},{pan:D.pan,kyc_status:'KYC Validated',kra:'SAMPLE KRA'}],
+ [/(phone|mobile) to pan/i,{mobile:D.mob},{pan:D.pan,name:D.name,match:true}],
+ [/\bpan\b/i,{pan:D.pan},{pan:D.pan,full_name:D.name,pan_status:'VALID',dob:'01-01-1990',aadhaar_seeding_status:'Y'}],
+ [/aadhaar.*uan|uan.*aadhaar/i,{aadhaar_number:D.aad,consent:'Y'},{uan:'1000XXXXXX01',name:D.name,employer:'SAMPLE TECHNOLOGIES PVT LTD'}],
+ [/okyc|digilocker/i,{aadhaar_number:D.aad,consent:'Y'},{name:D.name,dob:'01-01-1990',gender:'M',address:D.addr}],
+ [/seeding/i,{aadhaar_number:D.aad,mobile:D.mob},{mobile_seeded:true}],
+ [/aadhaar.*esign|esign|digital signature/i,{document:'<base64 PDF>',signer_name:D.name,signer_email:'signer@example.com'},{esign_request_id:'ES-000001',signing_url:'https://sign.example.com/s/ES-000001',status:'PENDING'}],
+ [/estamp/i,{state:'Maharashtra',stamp_duty_amount:500,first_party:'SAMPLE PVT LTD',second_party:D.name},{stamp_certificate_no:'IN-MH0000000000000X',status:'ISSUED'}],
+ [/aadhaar/i,{aadhaar_number:D.aad},{valid:true,age_band:'30-40',gender:'M',state:'Maharashtra',mobile_linked:true}],
+ [/e-invoice/i,{irn:'<64-character IRN>'},{valid:true,invoice_no:'INV-0001',invoice_date:'01-10-2026',seller_gstin:D.gstin}],
+ [/e-way bill/i,{eway_bill_no:'331000000001'},{status:'ACTIVE',valid_upto:'10-10-2026',from_gstin:D.gstin}],
+ [/gst.*analytics/i,{gstin:D.gstin,consent_handle:'<consent id>'},{turnover_last_12m:12500000,filing_regularity:'Regular',months_filed:12}],
+ [/hsn/i,{gstin:D.gstin},{goods:[{hsn:'8471',description:'Computers and parts'}],services:[{sac:'9983',description:'IT services'}]}],
+ [/mobile to gstin/i,{mobile:D.mob},{gstin_list:[{gstin:D.gstin,legal_name:'SAMPLE PRIVATE LIMITED'}]}],
+ [/gst to mobile/i,{gstin:D.gstin},{gstin:D.gstin,mobile:D.mob}],
+ [/gst/i,{gstin:D.gstin},{gstin:D.gstin,legal_name:'SAMPLE PRIVATE LIMITED',trade_name:'SAMPLE TRADERS',status:'Active',constitution:'Private Limited Company',registration_date:'01/04/2020',principal_address:D.addr}],
+ [/\bdin\b/i,{din:'01234567'},{din:'01234567',name:D.name,companies:[{cin:D.cin,designation:'Director'}]}],
+ [/udyam/i,{udyam_number:'UDYAM-MH-00-0000001'},{enterprise_name:'SAMPLE ENTERPRISES',enterprise_type:'Micro',major_activity:'Services',registration_date:'01-04-2021'}],
+ [/\btan\b/i,{tan:'MUMS12345A'},{tan:'MUMS12345A',name:'SAMPLE PRIVATE LIMITED',status:'Active'}],
+ [/fssai/i,{license_number:'10000000000001'},{business_name:'SAMPLE FOODS',status:'Active',valid_upto:'31-03-2028'}],
+ [/architect/i,{registration_number:'CA/2015/00001'},{name:D.name,status:'Active',valid_upto:'31-12-2027'}],
+ [/global company|fcrn|lei/i,{company_name:'Sample Holdings Ltd',country:'GB'},{registration_number:'00000001',status:'Active',incorporation_date:'2015-06-01',registered_address:'1 Sample Road, London'}],
+ [/company|cin|llp|mca/i,{cin:D.cin},{company_name:'SAMPLE PRIVATE LIMITED',cin:D.cin,status:'Active',incorporation_date:'15-06-2020',directors_count:2}],
+ [/mobile.?to.?(upi|multiple vpa)/i,{mobile:D.mob},{vpa_list:[D.vpa,'sample@bank']}],
+ [/vpa|upi/i,{vpa:D.vpa},{vpa:D.vpa,account_holder_name:D.name,account_ifsc:D.ifsc}],
+ [/mobile to bank/i,{mobile:D.mob},{accounts:[{bank:'SAMPLE BANK',ifsc:D.ifsc,account_number:D.acct}]}],
+ [/bank account|paisa/i,{account_number:D.acct,ifsc:D.ifsc},{account_exists:true,name_at_bank:D.name,name_match_score:92}],
+ [/ifsc/i,{ifsc:D.ifsc},{bank:'SAMPLE BANK',branch:'Fort, Mumbai',city:'Mumbai',neft:true,imps:true,upi:true}],
+ [/bin/i,{bin:'412345'},{issuer:'SAMPLE BANK',network:'VISA',card_type:'Debit',country:'IN'}],
+ [/statement|income estimator/i,{statement_file:'<base64 PDF or consent id>'},{avg_monthly_balance:85000,avg_monthly_credits:120000,bounced_transactions:0,months_analysed:6}],
+ [/electricity/i,{consumer_number:'000000000001',board:'SAMPLE ELECTRICITY BOARD'},{consumer_name:D.name,address:D.addr,status:'Active'}],
+ [/fastag/i,{vehicle_number:D.rc},{tag_status:'Active',issuer_bank:'SAMPLE BANK',vehicle_class:'Car/Jeep/Van'}],
+ [/traffic violation/i,{vehicle_number:D.rc},{pending_challans:1,total_amount:1000}],
+ [/dealer/i,{trade_certificate_number:'TC-MH-0001'},{dealer_name:'SAMPLE MOTORS',authorized:true}],
+ [/mobile to vehicle/i,{mobile:D.mob},{vehicles:[{registration_number:D.rc,maker_model:'SAMPLE MOTORS SEDAN'}]}],
+ [/chassis/i,{chassis_number:'MA1XXXXXXXXX12345'},{registration_number:D.rc,maker_model:'SAMPLE MOTORS SEDAN',rc_status:'ACTIVE'}],
+ [/\brc\b|vehicle/i,{vehicle_number:D.rc},{owner_name:'S**** N***',maker_model:'SAMPLE MOTORS SEDAN',fuel_type:'PETROL',registration_date:'01-01-2022',insurance_valid_upto:'31-12-2026',financer:'SAMPLE BANK',rc_status:'ACTIVE'}],
+ [/driving license/i,{dl_number:'MH0120200000001',dob:'01-01-1990'},{name:D.name,status:'Active',valid_upto:'31-12-2040',vehicle_classes:['LMV','MCWG']}],
+ [/voter/i,{epic_number:'ABC1234567'},{name:D.name,constituency:'Sample Constituency',state:'Maharashtra'}],
+ [/ckyc/i,{pan:D.pan,dob:'01-01-1990'},{ckyc_number:'XXXXXXXXXX1234',name:D.name,documents_available:['PAN','Photo','Address proof']}],
+ [/face match/i,{image_1:'<base64 selfie>',image_2:'<base64 ID photo>'},{match:true,match_score:94}],
+ [/liveness/i,{image:'<base64 selfie>'},{is_live:true,liveness_score:0.97}],
+ [/video kyc/i,{session_id:'VKYC-000001'},{status:'COMPLETED',face_match_score:93,agent_decision:'Approved'}],
+ [/ocr|document type|document upload/i,{document_image:'<base64 image>'},{document_type:'PAN',extracted:{name:D.name,number:D.pan,dob:'01-01-1990'}}],
+ [/fuzzy/i,{name_1:'Sample K Name',name_2:'Sample Name'},{match:true,score:88}],
+ [/mobile to physical address/i,{mobile:D.mob},{addresses:[{address:D.addr,last_seen:'2026-08'}]}],
+ [/address|geolocation|skip-trace/i,{address:D.addr},{standardized_address:D.addr,pincode:'400001',latitude:18.93,longitude:72.83,confidence:'High'}],
+ [/mobile to uan/i,{mobile:D.mob},{uan:'1000XXXXXX01',employer:'SAMPLE TECHNOLOGIES PVT LTD'}],
+ [/identity cross-match/i,{name:D.name,dob:'1990-01-01',country:'GB',id_number:'SAMPLE123'},{match:true,sources_matched:2}],
+ [/sim swap/i,{mobile:D.mob},{sim_swapped_last_30_days:false,risk:'Low'}],
+ [/email/i,{email:'person@example.com'},{profile_found:true,profile_url:'https://www.linkedin.com/in/sample'}],
+ [/\bip\b|ip-based/i,{ip_address:'203.0.113.10'},{country:'IN',is_proxy:false,is_vpn:false,risk_score:12}],
+ [/device/i,{device_fingerprint:'<sdk payload>'},{spoof_detected:false,emulator:false,risk:'Low'}],
+ [/digital footprint/i,{mobile:D.mob,email:'person@example.com'},{footprint_score:72,accounts_found:5}],
+ [/top-up/i,{mobile:'+62 81XXXXXX10'},{topups_last_90_days:6,avg_topup_amount:50000}],
+ [/mobile|phone|subscriber|prefill/i,{mobile:D.mob},{mobile:D.mob,name:D.name,operator:'SAMPLE TELECOM',circle:'Mumbai',status:'Active'}],
+ [/credit bureau|equifax|experian|crif|cibil/i,{name:D.name,pan:D.pan,mobile:D.mob,dob:'01-01-1990',consent:'Y'},{credit_score:750,active_accounts:3,overdue_accounts:0,enquiries_last_6m:1,report_id:'CR-000001'}],
+ [/credit assessment/i,{application_id:'APP-000001'},{recommended_limit:500000,risk_grade:'B',summary:'Sample assessment summary'}],
+ [/loan risk/i,{pan:D.pan},{alerts:[],risk_change:'None'}],
+ [/aml|pep/i,{name:D.name,dob:'01-01-1990',country:'IN'},{hits:0,risk_level:'Low',lists_checked:['Sanctions','PEP','Adverse media']}],
+ [/background check submission/i,{candidate_name:D.name,checks:['employment','address']},{case_id:'BGC-000001',status:'SUBMITTED'}],
+ [/background check/i,{case_id:'BGC-000001'},{case_id:'BGC-000001',status:'COMPLETED',result:'Clear'}],
+ [/court|crime|police|cybercrime|gig worker/i,{name:D.name,father_name:'SAMPLE FATHER NAME',state:'Maharashtra'},{records_found:0,result:'Clear'}],
+ [/money mule/i,{account_number:D.acct,ifsc:D.ifsc},{mule_risk:'Low',risk_score:8}],
+ [/fraud signal/i,{mobile:D.mob,email:'person@example.com'},{signals_found:0,risk:'Low'}],
+ [/employer|establishment/i,{establishment_code:'MHBAN0000001'},{establishment_name:'SAMPLE TECHNOLOGIES PVT LTD',status:'Live',members_count:250}],
+ [/uan|epfo/i,{uan:'1000XXXXXX01'},{employer_name:'SAMPLE TECHNOLOGIES PVT LTD',last_contribution_month:'09-2026',employment_status:'Active'}],
+ [/payslip|itr|income/i,{document:'<base64 PDF>'},{estimated_monthly_income:95000,employer:'SAMPLE TECHNOLOGIES PVT LTD'}]];
+function sampleFor(a){
+  let req,res,spec=false;
+  if(SPEC[a.n]){[req,res]=SPEC[a.n];spec=true}
+  else{const r=RULES.find(x=>x[0].test(a.n));[req,res]=r?[r[1],r[2]]:[{id_number:'SAMPLE123'},{verified:true}]}
+  const path='/v1/'+(GRP[a.c]||'apis')+'/'+a.id;
+  const env={api_category:a.c,api_name:a.n,billable:true,txn_id:'0f8c2a6e-5b1d-4c3a-9e7f-1a2b3c4d5e6f',message:'Success',status:1,result:res,datetime:'2026-10-07 10:30:15.123456'};
+  return {spec,req:'POST '+path+'\nx-api-key: <your API key>\nContent-Type: application/json\n\n'+JSON.stringify(req,null,2),res:JSON.stringify(env,null,2)};
+}
+function sampleBlock(a){const s=sampleFor(a);
+  return '<div class="sec smp"><h4>Sample request &amp; response</h4><div class="smpbar"><div class="seg sm" role="tablist"><button class="on" data-smp="req">Request</button><button data-smp="res">Response</button></div><button class="cpy" data-cpy>Copy</button></div>'
+   +'<pre class="code" data-smpbox="req">'+esc(s.req)+'</pre><pre class="code" data-smpbox="res" hidden>'+esc(s.res)+'</pre>'
+   +'<div class="smpnote">'+(s.spec?'Based on the TBX API specification; values masked.':'Illustrative sample with dummy values.')+' Full field list and error codes are shared at onboarding.</div></div>';}
+function wireSample(a){const box=$('#dBody');
+  box.querySelectorAll('[data-smp]').forEach(b=>b.onclick=()=>{box.querySelectorAll('[data-smp]').forEach(x=>x.classList.toggle('on',x===b));box.querySelectorAll('[data-smpbox]').forEach(p=>p.hidden=p.dataset.smpbox!==b.dataset.smp);});
+  const c=box.querySelector('[data-cpy]'); if(c) c.onclick=()=>{const p=[...box.querySelectorAll('[data-smpbox]')].find(x=>!x.hidden);navigator.clipboard&&navigator.clipboard.writeText(p.textContent).then(()=>toast('Copied'),()=>{});gc('sample-copied/'+a.id,'Sample copied: '+a.n);};}
+
 function hl(t,q){t=esc(t);if(!q)return t;const i=t.toLowerCase().indexOf(esc(q));return i<0?t:t.slice(0,i)+'<mark>'+t.slice(i,i+esc(q).length)+'</mark>'+t.slice(i+esc(q).length)}
 function score(a,q){if(!q)return 0;const n=a.n.toLowerCase();return n===q?100:n.startsWith(q)?60:n.includes(q)?40:(a.s||'').toLowerCase().includes(q)?20:5}
 function filtered(){const {q,ind,sort}=state();
@@ -313,12 +424,13 @@ function openApi(id,push=true){const a=API.find(x=>x.id===id);if(!a)return;lastF
   $('#dBody').innerHTML=(a.d?'<div class="sec"><h4>What it does</h4><p>'+esc(a.d)+'</p></div>':'')+(a.u?'<div class="sec"><h4>Typical use case</h4><p>'+esc(a.u)+'</p></div>':'')
    +(a.t?'<div class="sec"><h4>Built for</h4><p>'+esc(a.t)+'</p></div>':'')+(a.i?'<div class="sec"><h4>Industries</h4><div class="tags">'+a.i.split(',').map(x=>'<span class="t">'+esc(x.trim())+'</span>').join('')+'</div></div>':'')
    +'<div class="pricebox"><b>Pricing:</b> volume-based and tailored to your use case. Our team will share a quote within one business day.</div>'
+   +sampleBlock(a)
    +related(a);
   $('#dAct').innerHTML='<a class="btn cy" href="'+mail(a.n)+'">✉ Contact sales about this API</a><button class="btn gh" id="dCopy">🔗 Copy link</button>';
   $('#drawer').classList.add('on');$('#drawer').setAttribute('aria-hidden','false');$('#scrim').classList.add('on');document.body.style.overflow='hidden';
   if(push) history.replaceState(null,'','#'+a.id);
   $('#dClose').onclick=closeApi; $('#dCopy').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(location.href.split('#')[0]+'#'+a.id).then(()=>toast('Link copied — share it with your team'),()=>toast(location.href))};
-  $$('#dBody [data-rel]').forEach(b=>b.onclick=()=>openApi(b.dataset.rel));
+  $$('#dBody [data-rel]').forEach(b=>b.onclick=()=>openApi(b.dataset.rel)); wireSample(a);
   setTimeout(()=>$('#dClose').focus(),50);}
 function related(a){const r=API.filter(x=>x.id!==a.id&&x.s===a.s).slice(0,4);if(!r.length)return '';
   return '<div class="sec"><h4>Related APIs</h4><div class="tags">'+r.map(x=>'<button class="t" style="cursor:pointer;background:none" data-rel="'+x.id+'">'+esc(x.n)+'</button>').join('')+'</div></div>';}
