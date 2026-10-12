@@ -22,6 +22,8 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - name: Assemble feed from the TBX flow
         if: github.event_name == 'issues'
         env:
@@ -36,6 +38,7 @@ jobs:
             git commit -m "Catalogue / access update $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
           fi
+          git pull --rebase origin main || true
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
