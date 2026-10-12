@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publish:
-    if: github.event_name != 'issues' || (startsWith(github.event.issue.title, 'tbx-sync ') && github.event.issue.user.login == github.repository_owner)
+    if: github.event_name != 'issues' || ((startsWith(github.event.issue.title, 'tbx-sync ') || startsWith(github.event.issue.title, 'tbx-access ')) && github.event.issue.user.login == github.repository_owner)
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -28,11 +28,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 tools/assemble.py
-          if ! git diff --quiet site/data.json; then
+          python3 tools/access.py
+          if ! git diff --quiet site/data.json site/access.json; then
             git config user.name "tbx-sync-bot"
             git config user.email "tbx-sync-bot@users.noreply.github.com"
-            git add site/data.json
-            git commit -m "Catalogue sync $(date -u +%Y-%m-%dT%H:%MZ)"
+            git add site/data.json site/access.json
+            git commit -m "Catalogue / access update $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
           fi
       - uses: actions/configure-pages@v5
