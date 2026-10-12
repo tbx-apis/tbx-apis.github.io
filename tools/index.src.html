@@ -391,13 +391,15 @@ body>section,body>header{overflow-x:clip}
 .grid.locked{max-height:420px}
 .brand img{height:32px;width:auto}.flogo{height:52px;width:auto}
 .topnav{background:rgba(6,15,61,.97)!important}
+.plbadge{display:inline-block;margin-bottom:14px;font-size:12px;font-weight:600;color:#7FE3F7;background:rgba(0,168,204,.14);border:1px solid rgba(0,168,204,.4);border-radius:999px;padding:4px 12px}
+.plnote{font-size:12.5px;color:#9FAACB;margin:0 0 16px}
 </style>
 <script data-goatcounter="https://tbx-apis.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
 <nav class="topnav" id="topnav"><div class="wrap navin">
   <a href="#top" class="brand" aria-label="TBX home"><img src="tbx-logo-mark.svg" alt="TBX" width="88" height="32"></a>
-  <div class="nlinks"><a href="#apis">APIs</a><a href="#solutions">Solutions</a><a href="#proof">Why TBX</a></div>
+  <div class="nlinks"><a href="#apis">APIs</a><a href="#solutions">Partner-led solutions</a><a href="#proof">Why TBX</a></div>
   <div class="nact"><button class="theme" id="themeBtn" aria-label="Switch light or dark mode" title="Light / dark">◐</button><button class="btn cy" type="button" data-demo="">Book a demo</button></div>
 </div></nav>
 
@@ -437,7 +439,7 @@ body>section,body>header{overflow-x:clip}
 </div></section>
 
 <section class="solsec" id="solutions"><div class="wrap">
-  <div class="sh rv"><div class="kicker">Beyond APIs</div><h2>Ready-made TBX solutions.</h2><p>Launch faster with platforms built on the same infrastructure.</p></div>
+  <div class="sh rv"><div class="kicker">TBX implementation partner-led solutions</div><h2>Ready-made solutions, delivered with our partners.</h2><p>Each solution is delivered by TBX together with a specialist implementation partner. You get one TBX contract and one point of contact.</p></div>
   <div class="sx rv"><div class="sxlist" id="sxlist" role="tablist" aria-label="Solutions"></div><div class="sxpanel" id="sxpanel" aria-live="polite"></div></div>
 </div></section>
 
@@ -680,12 +682,12 @@ let sxCur=0;
 function renderSolutions(){
   $('#sxlist').innerHTML=SOL.map((x,k)=>'<button role="tab" class="sxi'+(k===sxCur?' on':'')+'" data-sx="'+k+'" aria-selected="'+(k===sxCur)+'"><span class="sxico">'+sico(x.icon)+'</span><span><b>'+esc(x.name)+'</b><small>'+esc(x.cat)+'</small></span></button>').join('');
   const x=SOL[sxCur];
-  $('#sxpanel').innerHTML='<div class="sxin" key="'+x.id+'"><div class="sxtop"><span class="sxbig">'+sico(x.icon)+'</span><div><div class="kicker">'+esc(x.cat)+'</div><h3>'+esc(x.name)+'</h3></div></div><p class="sxtag">'+esc(x.tag)+'</p><p class="sxsh">'+esc(x.short)+'</p><ul class="feat">'+x.features.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul><div class="sxmeta"><div><span>Built for</span>'+esc(x.who)+'</div><div><span>Outcome</span>'+esc(x.outcome)+'</div></div><div class="sxact"><button class="btn cy" type="button" data-demo="'+x.id+'">Book a demo</button><button class="btn ghost" type="button" data-sol="'+x.id+'">Share / details</button></div></div>';
+  $('#sxpanel').innerHTML='<div class="sxin" key="'+x.id+'"><span class="plbadge">🤝 TBX implementation partner-led</span><div class="sxtop"><span class="sxbig">'+sico(x.icon)+'</span><div><div class="kicker">'+esc(x.cat)+'</div><h3>'+esc(x.name)+'</h3></div></div><p class="sxtag">'+esc(x.tag)+'</p><p class="sxsh">'+esc(x.short)+'</p><ul class="feat">'+x.features.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul><div class="sxmeta"><div><span>Built for</span>'+esc(x.who)+'</div><div><span>Outcome</span>'+esc(x.outcome)+'</div></div><p class="plnote">Delivered by TBX with a specialist implementation partner. TBX stays your single point of contact for commercials, onboarding and support.</p><div class="sxact"><button class="btn cy" type="button" data-demo="'+x.id+'">Book a demo</button><button class="btn ghost" type="button" data-sol="'+x.id+'">Share / details</button></div></div>';
 }
 function pickSol(k){sxCur=(k+SOL.length)%SOL.length;renderSolutions();gc('solution/'+SOL[sxCur].id,'Solution viewed: '+SOL[sxCur].name);const b=document.querySelector('[data-sx="'+sxCur+'"]');if(b&&window.innerWidth<900)b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});}
 function openSolution(id){const x=SOL.find(s=>s.id===id);if(!x)return;lastFocus=document.activeElement;gc('solution/'+x.id,'Solution viewed: '+x.name);
-  $('#dHead').innerHTML='<button class="x" id="dClose" aria-label="Close">×</button><span class="st ok" style="margin:0">'+esc(x.cat)+'</span><h2 id="dTitle">'+esc(x.name)+'</h2><div class="cat">'+esc(x.tag)+'</div>';
-  $('#dBody').innerHTML='<div class="sec"><h4>What it does</h4><p>'+esc(x.short)+'</p></div><div class="sec"><h4>Key features</h4><ul class="feat">'+x.features.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul></div><div class="sec"><h4>Built for</h4><p>'+esc(x.who)+'</p></div><div class="pricebox"><b>Outcome:</b> '+esc(x.outcome)+'</div>';
+  $('#dHead').innerHTML='<button class="x" id="dClose" aria-label="Close">×</button><span class="st ok" style="margin:0">TBX implementation partner-led · '+esc(x.cat)+'</span><h2 id="dTitle">'+esc(x.name)+'</h2><div class="cat">'+esc(x.tag)+'</div>';
+  $('#dBody').innerHTML='<div class="sec"><h4>What it does</h4><p>'+esc(x.short)+'</p></div><div class="sec"><h4>Key features</h4><ul class="feat">'+x.features.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul></div><div class="sec"><h4>Built for</h4><p>'+esc(x.who)+'</p></div><div class="pricebox"><b>Outcome:</b> '+esc(x.outcome)+'</div><div class="sec"><h4>How it is delivered</h4><p>TBX implementation partner-led: delivered by TBX together with a specialist implementation partner. TBX remains your single point of contact for commercials, onboarding and support.</p></div>';
   $('#dAct').innerHTML='<button class="btn cy" type="button" id="dDemo">📅 Book a demo of '+esc(x.name)+'</button>';
   showDrawer(); $('#dDemo').onclick=()=>openDemo(x.id); history.replaceState(null,'','#solution-'+x.id);}
 function showDrawer(){$('#drawer').classList.add('on');$('#drawer').setAttribute('aria-hidden','false');$('#scrim').classList.add('on');document.body.style.overflow='hidden';$('#dClose').onclick=closeApi;setTimeout(()=>$('#dClose').focus(),50);}
@@ -765,7 +767,7 @@ function tabs(){const cats=[...new Set(API.map(a=>a.c))].sort((x,y)=>API.filter(
   $('#tabs').innerHTML='<button class="tab'+(cat?'':' on')+'" data-c="" role="tab">All <span class="n">'+API.length+'</span></button>'+cats.map(c=>'<button class="tab'+(cat===c?' on':'')+'" data-c="'+esc(c)+'" role="tab">'+esc(c)+' <span class="n">'+API.filter(a=>a.c===c).length+'</span></button>').join('');}
 function count(el,to){const t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/900);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
 function kpis(){const live=API.filter(a=>a.a).length,cats=new Set(API.map(a=>a.c)).size;
-  const k=[[200,'Clients trust TBX','+'],[API.length,'Verification APIs','+'],[35,'Banking partners','+'],[SOL.length,'Ready TBX solutions','']];
+  const k=[[200,'Clients trust TBX','+'],[API.length,'Verification APIs','+'],[35,'Banking partners','+'],[SOL.length,'Partner-led solutions','']];
   $('#kpis').innerHTML=k.map(x=>'<div class="kpi"><b><i data-to="'+x[0]+'">0</i>'+x[2]+'</b><span>'+x[1]+'</span></div>').join('');
   $$('#kpis i').forEach(b=>count(b,+b.dataset.to));}
 function sugs(){const s=['PAN','GST','Bank account','Vehicle RC'];$('#sugs').innerHTML=s.map(x=>'<button data-s="'+esc(x)+'">'+esc(x)+'</button>').join('');}
