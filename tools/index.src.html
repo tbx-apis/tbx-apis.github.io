@@ -454,7 +454,7 @@ body>section,body>header{overflow-x:clip}
   <div class="hl rv in">
     <div class="eyebrow"><i></i> TBX APIHub</div>
     <h1>Verify anyone.<br><span>In one API call.</span></h1>
-    <p class="lead" id="heroLead">140+ live identity, business, banking and risk APIs, trusted by 200+ financial institutions.</p>
+    <p class="lead" id="heroLead">500+ live and upcoming identity, business, banking and risk APIs, trusted by 200+ financial institutions.</p>
     <div class="hsearch">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="hq" type="search" placeholder="Search APIs & solutions, e.g. PAN, GST, Video KYC" aria-label="Search APIs and solutions" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="hqList"><kbd>/</kbd>
@@ -1028,7 +1028,7 @@ if(LEAD&&LEAD.email)$('#notMe').hidden=false;
 // sign-in tab for returning visitors (new device / browser)
 document.querySelectorAll('[data-gt]').forEach(b=>b.addEventListener('click',()=>{const reg=b.dataset.gt==='reg';
   document.querySelectorAll('[data-gt]').forEach(x=>x.classList.toggle('on',x===b));$('#gReg').hidden=!reg;$('#gSignin').hidden=reg;
-  $('#gTitle').textContent=reg?'Explore 140+ TBX APIs':'Welcome back';$('#gSub').textContent=reg?'Register once to unlock the full catalogue. It takes 20 seconds.':'Sign in with the email you registered with.';
+  $('#gTitle').textContent=reg?'Unlock 500+ TBX APIs':'Welcome back';$('#gSub').textContent=reg?'Register once to unlock the full catalogue. It takes 20 seconds.':'Sign in with the email you registered with.';
   setTimeout(()=>(reg?$('#gName'):$('#gInMail')).focus(),50);}));
 async function signIn(){const email=$('#gInMail').value.trim().toLowerCase();
   let okMail=/^[a-z0-9._%+'-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(email)&&!email.includes('..')&&!DISPOSABLE.test(email)&&!TYPO.test(email)&&!gibberish(email.split('@')[0].replace(/[._-]/g,' '));
