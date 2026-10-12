@@ -461,7 +461,7 @@ body>section,body>header{overflow-x:clip}
     <div class="seg" role="group" aria-label="Availability"><button data-v="all" class="on">All</button><button data-v="live">Available now</button><button data-v="soon">Coming soon</button></div>
     <select id="sort" aria-label="Sort"><option value="rel">Recommended</option><option value="az">A – Z</option></select>
   </div>
-  <div class="views" id="views" role="tablist" aria-label="API views"><button class="on" data-av="now" role="tab">Available now <span id="vcNow"></span></button><button data-av="soon" role="tab">⏳ Coming soon <span id="vcSoon"></span></button><button data-av="global" role="tab" class="gl">🌍 Global APIs <span id="vcGl"></span></button></div>
+  <div class="views" id="views" role="tablist" aria-label="API views"><button class="on" data-av="all" role="tab">All APIs <span id="vcAll"></span></button><button data-av="now" role="tab">✅ Available now <span id="vcNow"></span></button><button data-av="soon" role="tab">⏳ Coming soon <span id="vcSoon"></span></button><button data-av="global" role="tab" class="gl">🌍 Global APIs <span id="vcGl"></span></button></div>
   <div class="viewnote" id="viewnote"></div>
   <div class="tabs" id="tabs" role="tablist" aria-label="Categories"></div>
   <div class="meta"><span id="count" aria-live="polite"></span><button class="clear" id="clear" hidden>Clear filters</button></div>
@@ -564,7 +564,7 @@ const ICONS={
  'Credit & Alternate Data':'<path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/>',
  'Government & Public Records':'<path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6"/>','Tax & Compliance':'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>','Healthcare':'<path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/><path d="M12 9v5M9.5 11.5h5"/>','Education':'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>','Travel, Telecom & Utilities':'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>','Logistics & Supply Chain':'<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17" r="1.5"/><circle cx="17" cy="17" r="1.5"/>','Wealth & Deposits':'<path d="M4 10h16v9H4zM3 10l9-6 9 6M8 14h.01M12 14h.01M16 14h.01"/>','Insurance':'<path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="M9 12h6M12 9v6"/>','eSign & Document Workflow':'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M9 17c2-3 3 1 5-1"/>'};
 const icon=c=>{if(/^global/i.test(c))return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>';return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[c]||'<circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/>')+'</svg>';};
-let API=[],UPD='',cat='',avail='all',aview='now',cmp=new Set(),lastFocus=null;
+let API=[],UPD='',cat='',avail='all',aview='all',cmp=new Set(),lastFocus=null;
 const state=()=>({q:$('#q').value.trim().toLowerCase(),ind:$('#ind').value,sort:$('#sort').value});
 
 // ---- analytics (GoatCounter: anonymous, no cookies, no personal data sent) ----
@@ -810,7 +810,7 @@ function lockCopy(state){const u=$('#unlock>div');if(!u)return;
 function hl(t,q){t=esc(t);if(!q)return t;const i=t.toLowerCase().indexOf(esc(q));return i<0?t:t.slice(0,i)+'<mark>'+t.slice(i,i+esc(q).length)+'</mark>'+t.slice(i+esc(q).length)}
 function score(a,q){if(!q)return 0;const n=a.n.toLowerCase();return n===q?100:n.startsWith(q)?60:n.includes(q)?40:(a.s||'').toLowerCase().includes(q)?20:5}
 const isGl=a=>/^global/i.test(a.c)||/\bglobal\b/i.test(a.n);
-const inView=a=>aview==='global'?isGl(a):(!isGl(a)&&(aview==='now'?a.a:!a.a));
+const inView=a=>aview==='all'?true:aview==='global'?isGl(a):(!isGl(a)&&(aview==='now'?a.a:!a.a));
 function filtered(){const {q,ind,sort}=state();
   let l=API.filter(a=>inView(a)&&(!cat||a.c===cat)&&(avail==='all'||(avail==='live')===a.a)&&(!ind||(a.i||'').split(',').map(x=>x.trim()).includes(ind))
     &&(!q||[a.n,a.c,a.s,a.d,a.u,a.t,a.i].join(' ').toLowerCase().includes(q)));
@@ -829,7 +829,7 @@ function render(){const {q,ind}=state();const lf=filtered();const ast=accessStat
   $('#empty').hidden=lf.length>0; gcSearch(q,lf.length);}
 function tabs(){const V=API.filter(inView);const cats=[...new Set(V.map(a=>a.c))].sort((x,y)=>API.filter(a=>a.c===y).length-API.filter(a=>a.c===x).length);
   $('#tabs').innerHTML='<button class="tab'+(cat?'':' on')+'" data-c="" role="tab">All <span class="n">'+V.length+'</span></button>'+cats.map(c=>'<button class="tab'+(cat===c?' on':'')+'" data-c="'+esc(c)+'" role="tab">'+esc(c.replace(/^Global\s*[–-]\s*/i,''))+' <span class="n">'+V.filter(a=>a.c===c).length+'</span></button>').join('');
-  $('#vcNow').textContent=API.filter(a=>!isGl(a)&&a.a).length;$('#vcSoon').textContent=API.filter(a=>!isGl(a)&&!a.a).length;$('#vcGl').textContent=API.filter(isGl).length;
+  $('#vcAll').textContent=API.length;$('#vcNow').textContent=API.filter(a=>!isGl(a)&&a.a).length;$('#vcSoon').textContent=API.filter(a=>!isGl(a)&&!a.a).length;$('#vcGl').textContent=API.filter(isGl).length;
   $('#viewnote').innerHTML=aview==='soon'?'<b>'+API.filter(a=>!isGl(a)&&!a.a).length+' APIs coming soon.</b> Enquire on any to get early access. Need something not listed? <button class="linkbtn" type="button" data-enq="Custom API request">Request an API →</button>':aview==='global'?'<b>🌍 Global APIs</b> for customers and businesses outside India, separate from the India catalogue. <button class="linkbtn" type="button" data-enq="Global API request">Request a country or API →</button>':'';}
 function count(el,to){const t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/900);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
 function kpis(){const live=API.filter(a=>a.a).length,cats=new Set(API.map(a=>a.c)).size;
@@ -864,7 +864,7 @@ function compare(){const l=[...cmp].map(id=>API.find(a=>a.id===id)).filter(Boole
     +row('Category',a=>esc(a.c+(a.s?' · '+a.s:'')))+row('Use case',a=>esc(a.u||a.d))+row('Built for',a=>esc(a.t))+row('Industries',a=>esc(a.i))+'</table></div>';
   $('#dAct').innerHTML='<a class="btn cy" href="'+mail(l.map(a=>a.n).join(', '))+'">✉ Get pricing for these</a>';
   $('#drawer').classList.add('on');$('#drawer').setAttribute('aria-hidden','false');$('#scrim').classList.add('on');document.body.style.overflow='hidden';$('#dClose').onclick=closeApi;setTimeout(()=>$('#dClose').focus(),50);}
-function syncQ(v,from){if(from!=='q')$('#q').value=v;if(from!=='hq')$('#hq').value=v;render();}
+function syncQ(v,from){if(v&&aview!=='all'){aview='all';cat='';document.querySelectorAll('[data-av]').forEach(x=>x.classList.toggle('on',x.dataset.av==='all'));tabs();}if(from!=='q')$('#q').value=v;if(from!=='hq')$('#hq').value=v;render();}
 async function load(){await loadAccess();let d=null;
   try{const r=await fetch('data.json?v='+Date.now(),{cache:'no-store'});if(r.ok)d=await r.json();}catch(e){}
   if(!d||!Array.isArray(d.apis)||d.apis.length<20){try{d=JSON.parse($('#seed').textContent)}catch(e){d={apis:[]}}}
@@ -1031,7 +1031,7 @@ document.querySelectorAll('[data-lt]').forEach(b=>b.addEventListener('click',()=
 })();
 
 // ---- auto-refresh: anyone with an old copy open gets the newest version ----
-const BUILD="20261012045115";
+const BUILD="20261012060054";
 async function checkVersion(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.json()).v;
   if(v&&BUILD.indexOf('BUILD')<0&&v!==BUILD){if(!$('#drawer').classList.contains('on')&&$('#gate').hidden)location.reload();}}catch(e){}}
 setInterval(checkVersion,5*60*1000);
