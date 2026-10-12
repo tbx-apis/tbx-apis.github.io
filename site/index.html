@@ -3,10 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TBX Solutions &amp; APIHub | Lending, Video KYC, CKYC, Risk, Compliance &amp; 140+ APIs</title>
-<meta name="description" content="TBX solutions for lending, video KYC, CKYC, risk, compliance, AI and customer engagement, plus 140+ verification APIs. ISO 27001:2022, PCI DSS, SOC 2 Type II. Book a demo.">
-<meta property="og:title" content="TBX APIHub & Solutions | 140+ verification APIs">
-<meta property="og:description" content="Identity, KYB, banking, credit and risk APIs plus ready TBX solutions. ISO 27001:2022, PCI DSS, SOC 2 Type II. Trusted by 200+ financial institutions.">
+<title>TBX APIHub | 500+ Verification &amp; Risk APIs and Partner-led Solutions</title>
+<meta name="description" content="TBX solutions for lending, video KYC, CKYC, risk, compliance, AI and customer engagement, plus 500+ verification APIs (live and coming soon). ISO 27001:2022, PCI DSS, SOC 2 Type II. Book a demo.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tbx-apis.github.io/">
+<meta name="twitter:card" content="summary">
+<meta property="og:title" content="TBX APIHub | 500+ verification & risk APIs, one integration">
+<meta property="og:description" content="80+ live and 450+ upcoming identity, KYB, banking, credit, risk and global APIs, plus partner-led solutions for Video KYC, CKYC and fraud. ISO 27001:2022 · PCI DSS · SOC 2 Type II. Trusted by 200+ financial institutions.">
 <meta name="theme-color" content="#060F3D">
 <meta http-equiv="Cache-Control" content="no-cache">
 <link rel="icon" href="favicon.png">
@@ -466,7 +469,7 @@ body>section,body>header{overflow-x:clip}
 </header>
 
 <section class="apisec" id="apis"><div class="wrap">
-  <div class="sh rv"><div class="kicker">TBX APIHub</div><h2 id="apiH2">140+ APIs. One integration.</h2><p>Open any API for sample requests and a live try-it.</p></div>
+  <div class="sh rv"><div class="kicker">TBX APIHub</div><h2 id="apiH2">500+ APIs. One integration.</h2><p>Open any API for sample requests and a live try-it.</p></div>
   <div class="bar2 rv">
     <label class="bsearch"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search APIs…" aria-label="Search APIs" autocomplete="off"></label>
     <button class="fxbtn" id="fxBtn" type="button" aria-expanded="false">⚙ Filters</button>
@@ -480,7 +483,7 @@ body>section,body>header{overflow-x:clip}
   <div class="viewnote" id="viewnote"></div>
   <div class="tabs" id="tabs" role="tablist" aria-label="Categories"></div>
   <div class="meta"><span id="count" aria-live="polite"></span><button class="clear" id="clear" hidden>Clear filters</button></div>
-  <div class="gwrap"><div class="grid" id="grid"></div><div class="unlock" id="unlock" hidden><div><b>Unlock all 140+ APIs</b><p>Free · 20 seconds · sample requests and live try-it for every API.</p><button class="btn cy" type="button" id="unlockBtn">Register to unlock →</button></div></div></div>
+  <div class="gwrap"><div class="grid" id="grid"></div><div class="unlock" id="unlock" hidden><div><b>Unlock all 500+ APIs</b><p>Free · 20 seconds · sample requests and live try-it for every API.</p><button class="btn cy" type="button" id="unlockBtn">Register to unlock →</button></div></div></div>
   <div class="morewrap"><button class="btn ghost" type="button" id="moreBtn" hidden>Show all APIs ↓</button></div>
   <div class="empty" id="empty" hidden><b>No APIs match that search</b>Try a broader term, or <a href="#" data-mail>ask our team</a> — we add new APIs every month.</div>
 </div></section>
@@ -526,7 +529,7 @@ body>section,body>header{overflow-x:clip}
 
 <div class="gate" id="gate" hidden>
   <form class="gcard" id="gform" novalidate>
-    <div class="ghd"><button type="button" class="gx" id="gClose" aria-label="Close">×</button><img src="tbx-logo-mark.svg" alt="TBX" style="height:30px;width:auto"><h2 id="gTitle">Unlock 140+ TBX APIs</h2><p id="gSub">Register once to unlock the full catalogue. It takes 20 seconds.</p>
+    <div class="ghd"><button type="button" class="gx" id="gClose" aria-label="Close">×</button><img src="tbx-logo-mark.svg" alt="TBX" style="height:30px;width:auto"><h2 id="gTitle">Unlock 500+ TBX APIs</h2><p id="gSub">Register once to unlock the full catalogue. It takes 20 seconds.</p>
       </div>
     <div class="gbd" id="gSignin" hidden>
       <div class="fld"><label for="gInMail">Email you registered with *</label><input id="gInMail" type="email" autocomplete="email" inputmode="email" maxlength="120" placeholder="name@company.com" autocapitalize="off" spellcheck="false"><div class="er"></div></div>
@@ -820,7 +823,7 @@ function waRegistration(l){const needs=Date.now()>=(Date.parse(ACCESS.start)||0)
 function lockCopy(state){const u=$('#unlock>div');if(!u)return;
   if(state==='pending')u.innerHTML='<b>⏳ Your access request is under review</b><p>Thanks for registering. Our team approves new users quickly, usually within a few hours. Explore TBX solutions meanwhile.</p><button class="btn ghost" type="button" onclick="location.reload()">Check again</button>';
   else if(state==='blocked')u.innerHTML='<b>Access unavailable</b><p>Your access to the API catalogue is not active. Please contact our team if you think this is a mistake.</p><button class="btn cy" type="button" data-demo="">Contact us</button>';
-  else u.innerHTML='<b>Unlock all 140+ APIs</b><p>Free · 20 seconds · sample requests and live try-it for every API.</p><button class="btn cy" type="button" id="unlockBtn" onclick="gate()">Register to unlock →</button>';}
+  else u.innerHTML='<b>Unlock all 500+ APIs</b><p>Free · 20 seconds · sample requests and live try-it for every API.</p><button class="btn cy" type="button" id="unlockBtn" onclick="gate()">Register to unlock →</button>';}
 
 function hl(t,q){t=esc(t);if(!q)return t;const i=t.toLowerCase().indexOf(esc(q));return i<0?t:t.slice(0,i)+'<mark>'+t.slice(i,i+esc(q).length)+'</mark>'+t.slice(i+esc(q).length)}
 function score(a,q){if(!q)return 0;const n=a.n.toLowerCase();return n===q?100:n.startsWith(q)?60:n.includes(q)?40:(a.s||'').toLowerCase().includes(q)?20:5}
@@ -1078,7 +1081,7 @@ document.querySelectorAll('[data-lt]').forEach(b=>b.addEventListener('click',()=
 })();
 
 // ---- auto-refresh: anyone with an old copy open gets the newest version ----
-const BUILD="20261012083542";
+const BUILD="20261012134434";
 async function checkVersion(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.json()).v;
   if(v&&BUILD.indexOf('BUILD')<0&&v!==BUILD){if(!$('#drawer').classList.contains('on')&&$('#gate').hidden)location.reload();}}catch(e){}}
 setInterval(checkVersion,5*60*1000);
