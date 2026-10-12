@@ -825,7 +825,7 @@ function render(){const {q,ind}=state();const lf=filtered();const ast=accessStat
   $('#clear').hidden=!filtering;
   $('#grid').innerHTML=l.map((a,k)=>'<article class="card" tabindex="0" data-id="'+a.id+'" style="animation-delay:'+Math.min(k,9)*30+'ms">'
    +'<div class="ctop"><div class="ico">'+icon(a.c)+'</div>'+(a.a?'<span class="dot ok" title="Available now"></span>':'<span class="csoon">Coming soon</span>')+'</div>'
-   +'<h3>'+hl(a.n,q)+'</h3><div class="cat">'+esc(a.c)+'</div><p>'+hl(a.u||a.d,q)+'</p><span class="more">'+(a.a?'Details <b>→</b>':'Enquire for early access <b>→</b>')+'</span></article>').join('');
+   +'<h3>'+hl(a.n,q)+'</h3><div class="cat">'+esc(a.c)+'</div><p>'+hl(a.a?(a.u||a.d):(a.d||a.u),q)+'</p><span class="more">'+(a.a?'Details <b>→</b>':'Enquire for early access <b>→</b>')+'</span></article>').join('');
   $('#empty').hidden=lf.length>0; gcSearch(q,lf.length);}
 function tabs(){const V=API.filter(inView);const cats=[...new Set(V.map(a=>a.c))].sort((x,y)=>API.filter(a=>a.c===y).length-API.filter(a=>a.c===x).length);
   $('#tabs').innerHTML='<button class="tab'+(cat?'':' on')+'" data-c="" role="tab">All <span class="n">'+V.length+'</span></button>'+cats.map(c=>'<button class="tab'+(cat===c?' on':'')+'" data-c="'+esc(c)+'" role="tab">'+esc(c.replace(/^Global\s*[–-]\s*/i,''))+' <span class="n">'+V.filter(a=>a.c===c).length+'</span></button>').join('');
@@ -833,7 +833,7 @@ function tabs(){const V=API.filter(inView);const cats=[...new Set(V.map(a=>a.c))
   $('#viewnote').innerHTML=aview==='soon'?'<b>'+API.filter(a=>!isGl(a)&&!a.a).length+' APIs coming soon.</b> Enquire on any to get early access. Need something not listed? <button class="linkbtn" type="button" data-enq="Custom API request">Request an API →</button>':aview==='global'?'<b>🌍 Global APIs</b> for customers and businesses outside India, separate from the India catalogue. <button class="linkbtn" type="button" data-enq="Global API request">Request a country or API →</button>':'';}
 function count(el,to){const t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/900);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
 function kpis(){const live=API.filter(a=>a.a).length,cats=new Set(API.map(a=>a.c)).size;
-  const k=[[200,'Clients trust TBX','+'],[API.length,'Verification APIs','+'],[35,'Banking partners','+'],[SOL.length,'Partner-led solutions','']];
+  const k=[[200,'Clients trust TBX','+'],[API.length,'APIs live & coming soon','+'],[35,'Banking partners','+'],[SOL.length,'Partner-led solutions','']];
   $('#kpis').innerHTML=k.map(x=>'<div class="kpi"><b><i data-to="'+x[0]+'">0</i>'+x[2]+'</b><span>'+x[1]+'</span></div>').join('');
   $$('#kpis i').forEach(b=>count(b,+b.dataset.to));}
 function sugs(){const s=['PAN','GST','Bank account','Vehicle RC'];$('#sugs').innerHTML=s.map(x=>'<button data-s="'+esc(x)+'">'+esc(x)+'</button>').join('');}
@@ -1031,7 +1031,7 @@ document.querySelectorAll('[data-lt]').forEach(b=>b.addEventListener('click',()=
 })();
 
 // ---- auto-refresh: anyone with an old copy open gets the newest version ----
-const BUILD="20261012035744";
+const BUILD="20261012035940";
 async function checkVersion(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.json()).v;
   if(v&&BUILD.indexOf('BUILD')<0&&v!==BUILD){if(!$('#drawer').classList.contains('on')&&$('#gate').hidden)location.reload();}}catch(e){}}
 setInterval(checkVersion,5*60*1000);
