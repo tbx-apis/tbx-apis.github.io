@@ -54,7 +54,7 @@ h1 span{background:linear-gradient(90deg,var(--cyan2),#7FE3F7);-webkit-backgroun
 .hsearch input{width:100%;padding:17px 120px 17px 52px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font:inherit;font-size:16px;backdrop-filter:blur(6px)}
 .hsearch input::placeholder{color:#9FAACB}
 .hsearch input:focus{outline:none;border-color:var(--cyan2);background:rgba(255,255,255,.12)}
-.hsearch svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:#9FAACB}
+.hsearch>svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:#9FAACB}
 .hsearch kbd{position:absolute;right:14px;top:50%;transform:translateY(-50%);font:12px Inter,sans-serif;color:#9FAACB;border:1px solid rgba(255,255,255,.2);padding:3px 8px;border-radius:7px}
 .sugs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 0}
 .sugs button{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#D7DEF5;border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
@@ -423,6 +423,20 @@ body>section,body>header{overflow-x:clip}
 .soonchip{font-style:normal;font-size:10.5px;font-weight:700;color:#8A5A00;background:#FDF1D6;border-radius:999px;padding:1px 7px;margin-left:4px}
 .plbadge.soonb{color:#FFD27A;background:rgba(255,210,122,.12);border-color:rgba(255,210,122,.45);margin-left:6px}
 .linkbtn{background:none;border:0;color:var(--cyan);font-weight:700;cursor:pointer;padding:0;font-size:inherit}
+
+.hsearch{position:relative;z-index:30}
+.hqdrop{position:absolute;left:0;right:0;top:calc(100% + 8px);background:#fff;color:#0A1338;border-radius:16px;box-shadow:0 24px 60px rgba(5,11,44,.35);max-height:440px;overflow:auto;padding:6px;text-align:left}
+.hqh{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#8A93AD;padding:10px 12px 4px}.hqh span{text-transform:none;letter-spacing:0;font-weight:500}
+.hqi{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:12px;cursor:pointer}
+.hqi:hover,.hqi.on{background:#E3F6FB}
+.hqic{flex:0 0 34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#E3F6FB;color:#00A8CC}.hqic svg{width:18px;height:18px}
+.hqic.sol{background:#060F3D;color:#7FE3F7}
+.hqt{flex:1;min-width:0}.hqt b{display:block;font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hqt small{font-size:12px;color:#55607E}
+.hqt mark{background:#BFEFFB;color:inherit}
+.hb{font-style:normal;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;white-space:nowrap}.hb.ok{background:#E2F5EC;color:#0B7A47}.hb.sol{background:#060F3D;color:#7FE3F7}.hb.soon{background:#FDF1D6;color:#8A5A00}.hb.gl{background:#E3F6FB;color:#00A8CC}
+.hqall{padding:11px 12px;font-size:13.5px;font-weight:700;color:#00A8CC;cursor:pointer;border-top:1px solid #E2E7F1;margin-top:4px}.hqall:hover{background:#F5F7FB}
+.hqempty{padding:16px 12px;font-size:14px;color:#55607E}
+.hero{z-index:5;overflow:visible!important;overflow-x:clip!important}.hgrid .hl{position:relative;z-index:40}.trustline{position:relative;z-index:1}
 </style>
 <script data-goatcounter="https://tbx-apis.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
@@ -440,7 +454,8 @@ body>section,body>header{overflow-x:clip}
     <p class="lead" id="heroLead">140+ live identity, business, banking and risk APIs, trusted by 200+ financial institutions.</p>
     <div class="hsearch">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="hq" type="search" placeholder="Search APIs, e.g. PAN, GST, bank account" aria-label="Search APIs" autocomplete="off"><kbd>/</kbd>
+      <input id="hq" type="search" placeholder="Search APIs & solutions, e.g. PAN, GST, Video KYC" aria-label="Search APIs and solutions" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="hqList"><kbd>/</kbd>
+      <div class="hqdrop" id="hqDrop" hidden><div id="hqList" role="listbox"></div></div>
     </div>
     <div class="sugs" id="sugs"></div>
     <div class="hcta"><a class="btn cy lg2" href="#apis">Explore APIs</a><button class="btn ghost lg2" type="button" data-demo="">Book a demo</button></div>
@@ -836,7 +851,7 @@ function kpis(){const live=API.filter(a=>a.a).length,cats=new Set(API.map(a=>a.c
   const k=[[200,'Clients trust TBX','+'],[API.length,'APIs live & coming soon','+'],[35,'Banking partners','+'],[SOL.length,'Partner-led solutions','']];
   $('#kpis').innerHTML=k.map(x=>'<div class="kpi"><b><i data-to="'+x[0]+'">0</i>'+x[2]+'</b><span>'+x[1]+'</span></div>').join('');
   $$('#kpis i').forEach(b=>count(b,+b.dataset.to));}
-function sugs(){const s=['PAN','GST','Bank account','Vehicle RC'];$('#sugs').innerHTML=s.map(x=>'<button data-s="'+esc(x)+'">'+esc(x)+'</button>').join('');}
+function sugs(){const s=['PAN','GST','Video KYC','Bank account','CKYC'];$('#sugs').innerHTML=s.map(x=>'<button data-s="'+esc(x)+'">'+esc(x)+'</button>').join('');}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800)}
 function openApi(id,push=true){const a=API.find(x=>x.id===id);if(!a)return;{const ast=accessState();if(ast==='none'){gate();return;}if(ast!=='ok'){document.getElementById('apis').scrollIntoView({behavior:'smooth'});return;}}lastFocus=document.activeElement;gc('api/'+a.id,'API opened: '+a.n);
   $('#dHead').innerHTML='<button class="x" id="dClose" aria-label="Close">×</button><span class="st '+(a.a?'ok':'soon')+'" style="margin:0">'+(a.a?'Available now':'Coming soon')+'</span><h2 id="dTitle">'+esc(a.n)+'</h2><div class="cat">'+esc(a.c)+(a.s?' · '+esc(a.s):'')+'</div>';
@@ -880,9 +895,41 @@ async function load(){await loadAccess();let d=null;
 // events
 $$('[data-mail]').forEach(a=>a.href=mail(''));
 $('#q').addEventListener('input',e=>syncQ(e.target.value,'q'));
-$('#hq').addEventListener('input',e=>syncQ(e.target.value,'hq'));
-$('#hq').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('catalogue').scrollIntoView();}});
-$('#sugs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;syncQ(b.dataset.s,'');document.getElementById('catalogue').scrollIntoView();});
+// ---- hero search: instant results dropdown (APIs + solutions) ----
+let hqItems=[],hqSel=-1,hqT=null;
+function hqScore(q,n,extra){n=n.toLowerCase();const words=n.split(/[^a-z0-9]+/);
+  if(n===q)return 100;if(n.startsWith(q))return 85;if(words.some(w=>w.startsWith(q)))return 65;
+  if(q.length>=4&&n.includes(q))return 40;
+  const ex=(extra||'').toLowerCase();try{if(new RegExp('\\b'+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).test(ex))return 15;}catch(e){}return 0;}
+function hqRender(){const q=$('#hq').value.trim().toLowerCase(),box=$('#hqDrop'),list=$('#hqList');
+  if(q.length<2){box.hidden=true;$('#hq').setAttribute('aria-expanded','false');return;}
+  const sols=SOL.map(x=>({k:'sol',x,sc:hqScore(q,x.name,x.cat+' '+x.tag+' '+x.short)})).filter(r=>r.sc>0).map(r=>(r.sc+=5,r));
+  const apis=API.map(a=>{const sc=hqScore(q,a.n,a.c+' '+a.s+' '+a.d+' '+a.u);return {k:'api',x:a,sc:sc>0?sc+(a.a?2:0):0}}).filter(r=>r.sc>0);
+  const strong=apis.filter(r=>r.sc>=40).length, total=strong||apis.length;
+  hqItems=[...sols,...apis].sort((a,b)=>b.sc-a.sc||(a.k==='api'?a.x.n:a.x.name).localeCompare(b.k==='api'?b.x.n:b.x.name)).slice(0,8);hqSel=-1;
+  const badge=a=>isGl(a)?'<i class="hb gl">🌍 Global</i>':a.a?'<i class="hb ok">Live</i>':'<i class="hb soon">Coming soon</i>';
+  let h='';
+  if(hqItems.length){h='<div class="hqh">Top results <span>· '+total+' API'+(total>1?'s':'')+(sols.length?' · '+sols.length+' solution'+(sols.length>1?'s':''):'')+'</span></div>';
+    h+=hqItems.map((r,i)=>r.k==='sol'
+      ?'<div class="hqi" role="option" data-i="'+i+'"><span class="hqic sol">'+sico(r.x.icon)+'</span><span class="hqt"><b>'+hl(r.x.name,q)+'</b><small>Solution · '+esc(r.x.cat)+'</small></span><i class="hb sol">'+(r.x.status==='soon'?'Coming soon':'Solution')+'</i></div>'
+      :'<div class="hqi" role="option" data-i="'+i+'"><span class="hqic">'+icon(r.x.c)+'</span><span class="hqt"><b>'+hl(r.x.n,q)+'</b><small>'+esc(r.x.c.replace(/^Global\s*[–-]\s*/i,''))+'</small></span>'+badge(r.x)+'</div>').join('');
+    if(total>hqItems.filter(r=>r.k==='api').length)h+='<div class="hqall" data-all="1">See all '+total+' API results in the catalogue →</div>';}
+  else h='<div class="hqempty">No match for “'+esc(q)+'”. <button type="button" class="linkbtn" data-enq="API request: '+esc(q)+'">Request this API →</button></div>';
+  list.innerHTML=h;box.hidden=false;$('#hq').setAttribute('aria-expanded','true');}
+function hqOpen(i){const r=hqItems[i];if(!r)return;$('#hqDrop').hidden=true;gc('hero-search/'+$('#hq').value.trim().toLowerCase(),'Hero search: '+$('#hq').value.trim());
+  if(r.k==='sol'){sxCur=SOL.indexOf(r.x);renderSolutions();openSolution(r.x.id);}else openApi(r.x.id);}
+function hqSeeAll(){const v=$('#hq').value.trim();$('#hqDrop').hidden=true;syncQ(v,'hq');document.getElementById('apis').scrollIntoView({behavior:'smooth'});}
+$('#hq').addEventListener('input',()=>{clearTimeout(hqT);hqT=setTimeout(hqRender,90);});
+$('#hq').addEventListener('focus',()=>{if($('#hq').value.trim().length>=2)hqRender();});
+$('#hq').addEventListener('keydown',e=>{const n=hqItems.length;
+  if(e.key==='ArrowDown'&&n){e.preventDefault();hqSel=(hqSel+1)%n;}
+  else if(e.key==='ArrowUp'&&n){e.preventDefault();hqSel=(hqSel-1+n)%n;}
+  else if(e.key==='Enter'){e.preventDefault();if(hqSel>=0)hqOpen(hqSel);else if(n===1)hqOpen(0);else hqSeeAll();return;}
+  else if(e.key==='Escape'){$('#hqDrop').hidden=true;return;} else return;
+  document.querySelectorAll('.hqi').forEach(el=>el.classList.toggle('on',+el.dataset.i===hqSel));});
+$('#hqDrop').addEventListener('mousedown',e=>{const it=e.target.closest('.hqi');if(it){e.preventDefault();hqOpen(+it.dataset.i);return;}if(e.target.closest('[data-all]')){e.preventDefault();hqSeeAll();}});
+document.addEventListener('click',e=>{if(!e.target.closest('.hsearch'))$('#hqDrop').hidden=true;});
+$('#sugs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('#hq').value=b.dataset.s;hqRender();$('#hq').focus();});
 $('#ind').addEventListener('change',render);$('#sort').addEventListener('change',render);
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;cat=b.dataset.c;tabs();render();if(cat)gc('category/'+slug(cat),'Category: '+cat);});
 document.querySelector('.seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;avail=b.dataset.v;$$('.seg button').forEach(x=>x.classList.toggle('on',x===b));render();});
@@ -1031,7 +1078,7 @@ document.querySelectorAll('[data-lt]').forEach(b=>b.addEventListener('click',()=
 })();
 
 // ---- auto-refresh: anyone with an old copy open gets the newest version ----
-const BUILD="20261012060729";
+const BUILD="20261012083218";
 async function checkVersion(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.json()).v;
   if(v&&BUILD.indexOf('BUILD')<0&&v!==BUILD){if(!$('#drawer').classList.contains('on')&&$('#gate').hidden)location.reload();}}catch(e){}}
 setInterval(checkVersion,5*60*1000);
