@@ -8,6 +8,7 @@
 <meta property="og:title" content="TBX APIHub & Solutions | 140+ verification APIs">
 <meta property="og:description" content="Identity, KYB, banking, credit and risk APIs plus ready TBX solutions. ISO 27001:2022, PCI DSS, SOC 2 Type II. Trusted by 200+ financial institutions.">
 <meta name="theme-color" content="#060F3D">
+<meta http-equiv="Cache-Control" content="no-cache">
 <link rel="icon" href="__FAVICON__">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -983,6 +984,13 @@ document.querySelectorAll('[data-lt]').forEach(b=>b.addEventListener('click',()=
   const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
   addEventListener('scroll',()=>{nav.classList.toggle('sc',scrollY>10);let cur=null;secs.forEach(sec=>{if(sec.getBoundingClientRect().top<160)cur=sec.id});links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+cur));},{passive:true});
 })();
+
+// ---- auto-refresh: anyone with an old copy open gets the newest version ----
+const BUILD="__BUILD__";
+async function checkVersion(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.json()).v;
+  if(v&&BUILD.indexOf('BUILD')<0&&v!==BUILD){if(!$('#drawer').classList.contains('on')&&$('#gate').hidden)location.reload();}}catch(e){}}
+setInterval(checkVersion,5*60*1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkVersion();});
 
 load();
 </script>
