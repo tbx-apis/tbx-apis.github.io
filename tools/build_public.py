@@ -12,13 +12,33 @@ def clean(s):
     s = re.sub(r'\bVX[- ]?\d{2}[- ]?\d{3}\b', '', s)
     s = s.replace('vendor-level metadata', 'audit metadata')
     return re.sub(r'\s+', ' ', s).strip(' ;,')
+
+# If Category is blank in the tracker, infer it from the API name so a live API is never hidden.
+INFER = [(r'aadhaar|pan\b|voter|passport|driving|kyc|okyc|face|liveness|ocr|signature|identity|mobile number|digilocker', 'Identity & Individual KYC'),
+         (r'gst|cin|company|mca|udyam|llp|fssai|iec|business|director|din\b|tan\b', 'Business & KYB'),
+         (r'bank|ifsc|upi|vpa|penny|mandate|nach|payout|statement|bin\b', 'Banking & Payments'),
+         (r'credit|bureau|cibil|experian|equifax|crif|score', 'Credit & Alternate Data'),
+         (r'aml|pep|fraud|mule|court|crime|background|police', 'Risk, Fraud & Background'),
+         (r'vehicle|\brc\b|chassis|fastag|challan|property|land', 'Asset Verification'),
+         (r'uan|epfo|employ|salary|payslip|itr|income', 'Employment & Income'),
+         (r'esign|e-sign|estamp|e-stamp|document', 'eSign & Document Workflow'),
+         (r'email|ip\b|device|sim|digital', 'Contactability & Digital Risk'),
+         (r'lpg|electricity|water|gas|utility|telecom', 'Travel, Telecom & Utilities'),
+         (r'tamper', 'Risk, Fraud & Background')]
+def infer_cat(name):
+    n = name.lower()
+    for pat, c in INFER:
+        if re.search(pat, n): return c
+    return 'Other APIs'
 seen = {}
 for r in rows:
     name = clean(r.get('TBX API Name'))
     cat = clean(r.get('Category'))
     cat = CAT_MAP.get(cat, cat)
-    if not name or not cat or name.startswith('('):
+    if not name or name.startswith('('):
         continue
+    if not cat:
+        cat = infer_cat(name)
     status = (r.get('API Status') or '').strip().lower()
     avail = status == 'live'
     item = {"n": name, "c": cat, "s": clean(r.get('Sub-Category')), "d": clean(r.get('Detailed Description')),
@@ -26,7 +46,7 @@ for r in rows:
     if 'aml' in name.lower() and 'company information' in item["d"].lower():
         item["d"] = ''
     if not item["d"] and not item["u"]:
-        continue
+        item["d"] = name + ': details available on request. Book a demo or enquire to learn more.'
     k = name.lower()
     if k in seen and (seen[k]["a"] or not avail):
         continue
