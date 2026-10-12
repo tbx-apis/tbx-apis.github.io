@@ -422,6 +422,7 @@ body>section,body>header{overflow-x:clip}
 .csoon{font-size:11px;font-weight:700;color:#8A5A00;background:#FDF1D6;border-radius:999px;padding:3px 9px}
 .soonchip{font-style:normal;font-size:10.5px;font-weight:700;color:#8A5A00;background:#FDF1D6;border-radius:999px;padding:1px 7px;margin-left:4px}
 .plbadge.soonb{color:#FFD27A;background:rgba(255,210,122,.12);border-color:rgba(255,210,122,.45);margin-left:6px}
+.linkbtn{background:none;border:0;color:var(--cyan);font-weight:700;cursor:pointer;padding:0;font-size:inherit}
 </style>
 <script data-goatcounter="https://tbx-apis.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
@@ -436,7 +437,7 @@ body>section,body>header{overflow-x:clip}
   <div class="hl rv in">
     <div class="eyebrow"><i></i> TBX APIHub</div>
     <h1>Verify anyone.<br><span>In one API call.</span></h1>
-    <p class="lead">140+ identity, business, banking and risk APIs, trusted by 200+ financial institutions.</p>
+    <p class="lead" id="heroLead">140+ live identity, business, banking and risk APIs, trusted by 200+ financial institutions.</p>
     <div class="hsearch">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="hq" type="search" placeholder="Search APIs, e.g. PAN, GST, bank account" aria-label="Search APIs" autocomplete="off"><kbd>/</kbd>
@@ -450,7 +451,7 @@ body>section,body>header{overflow-x:clip}
 </header>
 
 <section class="apisec" id="apis"><div class="wrap">
-  <div class="sh rv"><div class="kicker">TBX APIHub</div><h2>140+ APIs. One integration.</h2><p>Open any API for sample requests and a live try-it.</p></div>
+  <div class="sh rv"><div class="kicker">TBX APIHub</div><h2 id="apiH2">140+ APIs. One integration.</h2><p>Open any API for sample requests and a live try-it.</p></div>
   <div class="bar2 rv">
     <label class="bsearch"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search APIs…" aria-label="Search APIs" autocomplete="off"></label>
     <button class="fxbtn" id="fxBtn" type="button" aria-expanded="false">⚙ Filters</button>
@@ -561,7 +562,7 @@ const ICONS={
  'Employment & Income':'<path d="M4 8h16v11H4zM9 8V6a3 3 0 0 1 6 0v2M4 13h16"/>',
  'Contactability & Digital Risk':'<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
  'Credit & Alternate Data':'<path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/>',
- 'Wealth & Deposits':'<path d="M4 10h16v9H4zM3 10l9-6 9 6M8 14h.01M12 14h.01M16 14h.01"/>','Insurance':'<path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="M9 12h6M12 9v6"/>','eSign & Document Workflow':'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M9 17c2-3 3 1 5-1"/>'};
+ 'Government & Public Records':'<path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6"/>','Tax & Compliance':'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>','Healthcare':'<path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/><path d="M12 9v5M9.5 11.5h5"/>','Education':'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>','Travel, Telecom & Utilities':'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>','Logistics & Supply Chain':'<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17" r="1.5"/><circle cx="17" cy="17" r="1.5"/>','Wealth & Deposits':'<path d="M4 10h16v9H4zM3 10l9-6 9 6M8 14h.01M12 14h.01M16 14h.01"/>','Insurance':'<path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="M9 12h6M12 9v6"/>','eSign & Document Workflow':'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M9 17c2-3 3 1 5-1"/>'};
 const icon=c=>{if(/^global/i.test(c))return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>';return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[c]||'<circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/>')+'</svg>';};
 let API=[],UPD='',cat='',avail='all',aview='now',cmp=new Set(),lastFocus=null;
 const state=()=>({q:$('#q').value.trim().toLowerCase(),ind:$('#ind').value,sort:$('#sort').value});
@@ -571,7 +572,7 @@ function gc(path,title){try{if(window.goatcounter&&window.goatcounter.count)wind
 let gcT=null;
 function gcSearch(q,n){clearTimeout(gcT);if(!q||q.length<2)return;gcT=setTimeout(()=>gc((n?'search/':'search-no-results/')+q.toLowerCase(),(n?'Search: ':'No results: ')+q),1500);}
 // ---- sample request / response (TBX-neutral, dummy or masked values only) ----
-const GRP={'Wealth & Deposits':'deposits','Insurance':'insurance','Identity & Individual KYC':'kyc','Business & KYB':'kyb','Banking & Payments':'banking','Risk, Fraud & Background':'risk','Asset Verification':'asset','Employment & Income':'employment','Contactability & Digital Risk':'contact','Credit & Alternate Data':'credit','eSign & Document Workflow':'esign'};
+const GRP={'Government & Public Records':'records','Tax & Compliance':'tax','Healthcare':'health','Education':'education','Travel, Telecom & Utilities':'utilities','Logistics & Supply Chain':'logistics','Wealth & Deposits':'deposits','Insurance':'insurance','Identity & Individual KYC':'kyc','Business & KYB':'kyb','Banking & Payments':'banking','Risk, Fraud & Background':'risk','Asset Verification':'asset','Employment & Income':'employment','Contactability & Digital Risk':'contact','Credit & Alternate Data':'credit','eSign & Document Workflow':'esign'};
 const D={pan:'ABCDE1234F',name:'SAMPLE NAME',mob:'98XXXXXX10',gstin:'27ABCDE1234F1Z5',cin:'U72900MH2020PTC000001',acct:'XXXXXXXX1234',ifsc:'ABCD0001234',vpa:'sample@upi',rc:'MH01AB1234',aad:'XXXX XXXX 1234',addr:'Flat 1, Sample Street, Mumbai, Maharashtra 400001'};
 // spec-backed (fields as in the TBX API specification, values masked)
 const SPEC={
@@ -829,7 +830,7 @@ function render(){const {q,ind}=state();const lf=filtered();const ast=accessStat
 function tabs(){const V=API.filter(inView);const cats=[...new Set(V.map(a=>a.c))].sort((x,y)=>API.filter(a=>a.c===y).length-API.filter(a=>a.c===x).length);
   $('#tabs').innerHTML='<button class="tab'+(cat?'':' on')+'" data-c="" role="tab">All <span class="n">'+V.length+'</span></button>'+cats.map(c=>'<button class="tab'+(cat===c?' on':'')+'" data-c="'+esc(c)+'" role="tab">'+esc(c.replace(/^Global\s*[–-]\s*/i,''))+' <span class="n">'+V.filter(a=>a.c===c).length+'</span></button>').join('');
   $('#vcNow').textContent=API.filter(a=>!isGl(a)&&a.a).length;$('#vcSoon').textContent=API.filter(a=>!isGl(a)&&!a.a).length;$('#vcGl').textContent=API.filter(isGl).length;
-  $('#viewnote').innerHTML=aview==='soon'?'<b>Coming soon.</b> Enquire on any API to get early access and be first in line when it launches.':aview==='global'?'<b>🌍 Global APIs</b> for customers and businesses outside India. Separate from the India catalogue.':'';}
+  $('#viewnote').innerHTML=aview==='soon'?'<b>'+API.filter(a=>!isGl(a)&&!a.a).length+' APIs coming soon.</b> Enquire on any to get early access. Need something not listed? <button class="linkbtn" type="button" data-enq="Custom API request">Request an API →</button>':aview==='global'?'<b>🌍 Global APIs</b> for customers and businesses outside India, separate from the India catalogue. <button class="linkbtn" type="button" data-enq="Global API request">Request a country or API →</button>':'';}
 function count(el,to){const t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/900);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
 function kpis(){const live=API.filter(a=>a.a).length,cats=new Set(API.map(a=>a.c)).size;
   const k=[[200,'Clients trust TBX','+'],[API.length,'Verification APIs','+'],[35,'Banking partners','+'],[SOL.length,'Partner-led solutions','']];
@@ -842,13 +843,13 @@ function openApi(id,push=true){const a=API.find(x=>x.id===id);if(!a)return;{cons
   $('#dBody').innerHTML=(a.d?'<div class="sec"><h4>What it does</h4><p>'+esc(a.d)+'</p></div>':'')+(a.u?'<div class="sec"><h4>Typical use case</h4><p>'+esc(a.u)+'</p></div>':'')
    +(a.t?'<div class="sec"><h4>Built for</h4><p>'+esc(a.t)+'</p></div>':'')+(a.i?'<div class="sec"><h4>Industries</h4><div class="tags">'+a.i.split(',').map(x=>'<span class="t">'+esc(x.trim())+'</span>').join('')+'</div></div>':'')
    +'<div class="pricebox"><b>Pricing:</b> volume-based and tailored to your use case. Our team will share a quote within one business day.</div>'
-   +sampleBlock(a)
+   +(a.a?sampleBlock(a):'<div class="sec"><h4>Coming soon</h4><p>This API is on our launch roadmap. Enquire now to get early access, launch timelines and pilot pricing before general availability.</p></div>')
    +related(a);
   $('#dAct').innerHTML=(a.a?'<button class="btn cy" type="button" data-demo="apis">📅 Talk to us about this API</button>':'<button class="btn cy" type="button" data-enq="'+esc(a.n)+'">🔔 Enquire — get early access</button>')+'<button class="btn gh" id="dCmp">'+(cmp.has(a.id)?'✓ In compare':'＋ Compare')+'</button><button class="btn gh" id="dCopy">🔗 Copy link</button>';
   $('#drawer').classList.add('on');$('#drawer').setAttribute('aria-hidden','false');$('#scrim').classList.add('on');document.body.style.overflow='hidden';
   if(push) history.replaceState(null,'','#'+a.id);
   $('#dClose').onclick=closeApi; $('#dCmp').onclick=()=>{if(cmp.has(a.id))cmp.delete(a.id);else{if(cmp.size>=3){toast('You can compare up to 3 APIs');return}cmp.add(a.id)}$('#dCmp').textContent=cmp.has(a.id)?'✓ In compare':'＋ Compare';tray();}; $('#dCopy').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(location.href.split('#')[0]+'#'+a.id).then(()=>toast('Link copied — share it with your team'),()=>toast(location.href))};
-  $$('#dBody [data-rel]').forEach(b=>b.onclick=()=>openApi(b.dataset.rel)); wireSample(a);
+  $$('#dBody [data-rel]').forEach(b=>b.onclick=()=>openApi(b.dataset.rel)); if(a.a)wireSample(a);
   setTimeout(()=>$('#dClose').focus(),50);}
 function related(a){const r=API.filter(x=>x.id!==a.id&&x.s===a.s).slice(0,4);if(!r.length)return '';
   return '<div class="sec"><h4>Related APIs</h4><div class="tags">'+r.map(x=>'<button class="t" style="cursor:pointer;background:none" data-rel="'+x.id+'">'+esc(x.n)+'</button>').join('')+'</div></div>';}
@@ -871,6 +872,9 @@ async function load(){await loadAccess();let d=null;
   const inds=new Set();API.forEach(a=>(a.i||'').split(',').map(x=>x.trim()).filter(Boolean).forEach(x=>inds.add(x)));
   $('#ind').innerHTML='<option value="">All industries</option>'+[...inds].sort().map(i=>'<option>'+esc(i)+'</option>').join('');
   if(UPD){try{$('#upd').textContent='Catalogue updated '+new Date(UPD).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}catch(e){}}
+  {const live=API.filter(a=>a.a).length,soon=API.length-live,gl=API.filter(isGl).length,r=n=>Math.floor(n/10)*10+'+';
+   $('#heroLead').textContent=r(live)+' live APIs and '+(soon>0?r(soon)+' coming soon':'more coming')+' across identity, business, banking, risk and more, trusted by 200+ financial institutions.';
+   $('#apiH2').textContent=r(API.length)+' APIs. One integration.';}
   kpis();sugs();tabs();render();
   const h=decodeURIComponent(location.hash.slice(1));if(h&&API.some(a=>a.id===h))openApi(h,false);}
 // events
@@ -1027,7 +1031,7 @@ document.querySelectorAll('[data-lt]').forEach(b=>b.addEventListener('click',()=
 })();
 
 // ---- auto-refresh: anyone with an old copy open gets the newest version ----
-const BUILD="20261012034134";
+const BUILD="20261012035744";
 async function checkVersion(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.json()).v;
   if(v&&BUILD.indexOf('BUILD')<0&&v!==BUILD){if(!$('#drawer').classList.contains('on')&&$('#gate').hidden)location.reload();}}catch(e){}}
 setInterval(checkVersion,5*60*1000);
