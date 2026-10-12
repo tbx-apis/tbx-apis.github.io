@@ -831,8 +831,8 @@ try{const t=localStorage.getItem('tbx-theme');if(t)document.documentElement.data
 const LEAD_URL="https://formsubmit.co/ajax/"+CONTACT;
 const CC=[["+91","India"],["+971","UAE"],["+966","Saudi Arabia"],["+974","Qatar"],["+965","Kuwait"],["+968","Oman"],["+973","Bahrain"],["+65","Singapore"],["+60","Malaysia"],["+62","Indonesia"],["+66","Thailand"],["+63","Philippines"],["+84","Vietnam"],["+880","Bangladesh"],["+94","Sri Lanka"],["+977","Nepal"],["+44","UK"],["+1","USA / Canada"],["+61","Australia"],["+27","South Africa"],["+234","Nigeria"],["+254","Kenya"],["+49","Germany"],["+33","France"],["+81","Japan"]];
 function sendLead(l){return fetch(LEAD_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
-  body:JSON.stringify({_subject:l.returning?('Returning visitor signed in: '+l.email):('New TBX API Catalogue registration: '+l.company),_template:'table',_captcha:'false',
-    Name:l.name,Company:l.company,Email:l.email,'Email type':l.emailType||'',Mobile:l.cc+' '+l.phone,Country:l.country||'',Segment:l.role||'-',Source:l.source||'',Page:location.href,'Registered at':new Date(l.at||Date.now()).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST'})})
+  body:JSON.stringify(Object.assign({_subject:(Date.now()>=(Date.parse(ACCESS.start)||0)?'APPROVAL NEEDED: ':'New registration: ')+l.name+' ('+l.company+')',_template:'table',_captcha:'false'},l.h?{'✅ APPROVE (tap, then Submit)':decisionLink('approve',l.h),'⛔ BLOCK (tap, then Submit)':decisionLink('block',l.h),'Access':Date.now()>=(Date.parse(ACCESS.start)||0)?'Waiting for your approval':'Granted automatically (first 5 days). Block anytime with the link.'}:{},{
+    Name:l.name,Company:l.company,Email:l.email,'Email type':l.emailType||'',Mobile:l.cc+' '+l.phone,Country:l.country||'',Segment:l.role||'-',Source:l.source||'',Page:location.href,'Registered at':new Date(l.at||Date.now()).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST'}))})
   .then(r=>{if(!r.ok)throw 0;l.sent=true;try{localStorage.setItem('tbx-lead',JSON.stringify(l))}catch(e){}}).catch(()=>{});}
 function gate(){
   if(LEAD&&LEAD.email){ if(!LEAD.sent) sendLead(LEAD); return; }
