@@ -30,6 +30,19 @@ def infer_cat(name):
     for pat, c in INFER:
         if re.search(pat, n): return c
     return 'Other APIs'
+
+# Exact samples from the tracker (Sample Request / Sample Response). Sanitised: no URLs or vendor names.
+VENDORS = r'digitap|trusthub|befisc|surepass|tenacio|sprintverify|signzy|bureau\.id|bureauid|perfios|karza|idfy|ongrid|valuepitch|value pitch|neokred|finb|e-?mudhra|saafe|doqfy|timble|apiclub|api club|protean|carinfo|croissance|blostem|coversure|bharat ?informatics|aadhaarapi|cashfree|setu'
+def sample(v):
+    v = (v or '').strip()
+    if not v:
+        return None
+    v = re.sub(r'https?://[^\s"\'<>]+', '<url>', v)
+    v = re.sub(VENDORS, 'TBX', v, flags=re.I)
+    try:
+        return json.loads(v)
+    except Exception:
+        return v[:6000]
 seen = {}
 for r in rows:
     name = clean(r.get('TBX API Name'))
@@ -43,6 +56,9 @@ for r in rows:
     avail = status == 'live'
     item = {"n": name, "c": cat, "s": clean(r.get('Sub-Category')), "d": clean(r.get('Detailed Description')),
             "u": clean(r.get('Use-Case')), "t": clean(r.get('Target Customers')), "i": clean(r.get('Target Industry')), "a": avail}
+    rq, rs = sample(r.get('Sample Request')), sample(r.get('Sample Response'))
+    if rq is not None and rs is not None:
+        item["rq"], item["rs"] = rq, rs
     if 'aml' in name.lower() and 'company information' in item["d"].lower():
         item["d"] = ''
     if not item["d"] and not item["u"]:

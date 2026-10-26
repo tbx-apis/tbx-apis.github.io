@@ -21,6 +21,8 @@ function main(workbook: ExcelScript.Workbook, csv: string): SyncPart[] {
   const head: string[] = rows[0].map(x => x.trim());
   const idx: number[] = KEEP.map(k => head.indexOf(k));
   if (idx.some(i => i < 0)) { throw new Error("Feed is missing a public column."); }
+  // Optional exact samples (from TBX API docs). Vendor endpoints are never included.
+  for (const opt of ["Sample Request", "Sample Response"]) { const j = head.indexOf(opt); if (j >= 0) { KEEP.push(opt); idx.push(j); } }
   const q = (s: string): string => (s.indexOf(",") >= 0 || s.indexOf("\"") >= 0) ? "\"" + s.split("\"").join("\"\"") + "\"" : s;
   const header = KEEP.map(k => q(k)).join(",");
   const lines: string[] = [];
