@@ -444,6 +444,9 @@ body>section,body>header{overflow-x:clip}
 .b360i{display:flex;gap:14px;align-items:center;min-width:0;flex:1 1 380px}.b360i b{display:block;font-size:16px}.b360i span{font-size:13.5px;color:#B9C4E4}
 .b360ic{flex:0 0 44px;height:44px;border-radius:12px;background:rgba(0,168,204,.18);color:#7FE3F7;display:grid;place-items:center}.b360ic svg{width:24px;height:24px}
 .b360a{display:flex;gap:8px;flex-wrap:wrap}.b360 .btn.ghost{color:#fff;border-color:rgba(255,255,255,.35)}
+.prq{margin:8px 0 2px;font-size:12.5px;line-height:1.4;color:#C0262D}.prq b{font-weight:700}
+.prbox{margin:0 0 16px;padding:12px 14px;border:1.5px solid #E5484D;border-radius:12px;background:rgba(229,72,77,.08)}.prbox h4{margin:0 0 4px;color:#C0262D;font-size:13px;text-transform:uppercase;letter-spacing:.5px}.prbox p{margin:0;color:#C0262D;font-weight:600}.prbox small{display:block;margin-top:4px;color:#A1474B}
+@media (prefers-color-scheme:dark){.prq{color:#FF8A8F}.prbox{background:rgba(255,107,112,.12);border-color:#FF6B70}.prbox h4,.prbox p{color:#FF8A8F}.prbox small{color:#FFB3B6}}
 </style>
 <script data-goatcounter="https://tbx-apis.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
@@ -849,7 +852,7 @@ function render(){const {q,ind}=state();const lf=filtered();const ast=accessStat
   $('#clear').hidden=!filtering;
   $('#grid').innerHTML=l.map((a,k)=>'<article class="card" tabindex="0" data-id="'+a.id+'" style="animation-delay:'+Math.min(k,9)*30+'ms">'
    +'<div class="ctop"><div class="ico">'+icon(a.c)+'</div>'+(a.a?'<span class="dot ok" title="Available now"></span>':'<span class="csoon">Coming soon</span>')+'</div>'
-   +'<h3>'+hl(a.n,q)+'</h3><div class="cat">'+esc(a.c)+'</div><p>'+hl(a.a?(a.u||a.d):(a.d||a.u),q)+'</p><span class="more">'+(a.a?'Details <b>→</b>':'Enquire for early access <b>→</b>')+'</span></article>').join('');
+   +'<h3>'+hl(a.n,q)+'</h3><div class="cat">'+esc(a.c)+'</div><p>'+hl(a.a?(a.u||a.d):(a.d||a.u),q)+'</p>'+(a.pr?'<div class="prq"><b>Pre-requisite:</b> '+esc(a.pr)+'</div>':'')+'<span class="more">'+(a.a?'Details <b>→</b>':'Enquire for early access <b>→</b>')+'</span></article>').join('');
   $('#empty').hidden=lf.length>0; gcSearch(q,lf.length);}
 function tabs(){const V=API.filter(inView);const cats=[...new Set(V.map(a=>a.c))].sort((x,y)=>API.filter(a=>a.c===y).length-API.filter(a=>a.c===x).length);
   $('#tabs').innerHTML='<button class="tab'+(cat?'':' on')+'" data-c="" role="tab">All <span class="n">'+V.length+'</span></button>'+cats.map(c=>'<button class="tab'+(cat===c?' on':'')+'" data-c="'+esc(c)+'" role="tab">'+esc(c.replace(/^Global\s*[–-]\s*/i,''))+' <span class="n">'+V.filter(a=>a.c===c).length+'</span></button>').join('');
@@ -864,7 +867,7 @@ function sugs(){const s=['Business 360','PAN','GST','Video KYC','CKYC'];$('#sugs
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800)}
 function openApi(id,push=true){const a=API.find(x=>x.id===id);if(!a)return;{const ast=accessState();if(ast==='none'){gate();return;}if(ast!=='ok'){document.getElementById('apis').scrollIntoView({behavior:'smooth'});return;}}lastFocus=document.activeElement;gc('api/'+a.id,'API opened: '+a.n);
   $('#dHead').innerHTML='<button class="x" id="dClose" aria-label="Close">×</button><span class="st '+(a.a?'ok':'soon')+'" style="margin:0">'+(a.a?'Available now':'Coming soon')+'</span><h2 id="dTitle">'+esc(a.n)+'</h2><div class="cat">'+esc(a.c)+(a.s?' · '+esc(a.s):'')+'</div>';
-  $('#dBody').innerHTML=(a.d?'<div class="sec"><h4>What it does</h4><p>'+esc(a.d)+'</p></div>':'')+(a.u?'<div class="sec"><h4>Typical use case</h4><p>'+esc(a.u)+'</p></div>':'')
+  $('#dBody').innerHTML=(a.pr?'<div class="prbox"><h4>Pre-requisite</h4><p>'+esc(a.pr)+'</p><small>Please keep these ready before go-live.</small></div>':'')+(a.d?'<div class="sec"><h4>What it does</h4><p>'+esc(a.d)+'</p></div>':'')+(a.u?'<div class="sec"><h4>Typical use case</h4><p>'+esc(a.u)+'</p></div>':'')
    +(a.t?'<div class="sec"><h4>Built for</h4><p>'+esc(a.t)+'</p></div>':'')+(a.i?'<div class="sec"><h4>Industries</h4><div class="tags">'+a.i.split(',').map(x=>'<span class="t">'+esc(x.trim())+'</span>').join('')+'</div></div>':'')
    +'<div class="pricebox"><b>Pricing:</b> volume-based and tailored to your use case. Our team will share a quote within one business day.</div>'
    +(a.a?sampleBlock(a):'<div class="sec"><h4>Coming soon</h4><p>This API is on our launch roadmap. Enquire now to get early access, launch timelines and pilot pricing before general availability.</p></div>')

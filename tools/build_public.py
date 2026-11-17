@@ -56,6 +56,9 @@ for r in rows:
     avail = status == 'live'
     item = {"n": name, "c": cat, "s": clean(r.get('Sub-Category')), "d": clean(r.get('Detailed Description')),
             "u": clean(r.get('Use-Case')), "t": clean(r.get('Target Customers')), "i": clean(r.get('Target Industry')), "a": avail}
+    pre = clean(r.get('Pre-Requisite'))
+    if pre and not re.fullmatch(r'(?i)none|na|n/a|-|nil', pre.strip()):
+        item["pr"] = pre
     rq, rs = sample(r.get('Sample Request')), sample(r.get('Sample Response'))
     if rq is not None and rs is not None:
         item["rq"], item["rs"] = rq, rs
